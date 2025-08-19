@@ -1,0 +1,21 @@
+# Ignora virtual environment Python
+.venv/
+venv/
+ENV/
+env/
+
+# Ignora dipendenze Node
+node_modules/
+
+# Ignora cache Python
+__pycache__/
+*.pyc
+
+# Ignora file di log
+*.log
+
+# Ignora file di ambiente
+.env
+
+# Ignora roba di VS Code
+.vscode/
