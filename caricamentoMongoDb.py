@@ -1,13 +1,19 @@
 import pandas as pd
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
 
 # ==============================
 # Connessione a MongoDB Atlas
 # ==============================
-client = MongoClient(
-    "mongodb+srv://dbMD:progettoSDD@cluster0.cw4uk5y.mongodb.net/"
-    "?retryWrites=true&w=majority&appName=Cluster0"
-)
+# Carica le variabili dal .env
+load_dotenv()
+
+# Prendi l'URI dal .env
+MONGO_URI = os.getenv("MONGO_URI")
+
+# Connessione a MongoDB
+client = MongoClient(MONGO_URI)
 db = client["booksDB"]
 
 # Collezioni
