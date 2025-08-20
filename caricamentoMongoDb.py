@@ -57,7 +57,7 @@ for _, row in df_users.iterrows():
         "username": str(row["username"]),
         "email": str(row["email"]),
         "wallet_address": str(row["wallet_address"]),
-        "BookId": str(row["BookId"])   # aggiunto
+        
     }
     users_documents.append(doc)
 
