@@ -7,26 +7,50 @@ db = client["booksDB"]
 
 # Collezioni
 book_collection = db["book"]
-transactions_collection = db["transactions"]
 users_collection = db["users"]
+transactions_collection = db["transactions"]
 
-# Pulisce le collezioni esistenti
+# Pulisce le collezioni esistenti (sovrascrive)
 book_collection.delete_many({})
-transactions_collection.delete_many({})
 users_collection.delete_many({})
+transactions_collection.delete_many({})
+print("Collezioni svuotate")
 
-print("Collezioni svuotate e pronte per l'inserimento.")
+# Carica CSV utenti
+users_df = pd.read_csv("database/users.csv", sep=";")
 
-# ===============================
-# CARICAMENTO BOOKS
-# ===============================
-df_books = pd.read_csv("database/book.csv", sep=";")
+# Inserisci utenti
+users_documents = []
+for _, row in users_df.iterrows():
+    doc = {
+        "username": str(row["username"]),
+        "email": str(row["email"]),
+        "wallet_address": str(row["wallet_address"])
+    }
+    users_documents.append(doc)
+if users_documents:
+    users_collection.insert_many(users_documents)
+print(f"Inseriti {len(users_documents)} utenti")
 
-# Conversione numerica su "Year-Of-Publication"
-df_books["Year-Of-Publication"] = pd.to_numeric(df_books["Year-Of-Publication"], errors="coerce").fillna(0).astype(int)
+# Mapping UserID → utente (username + wallet)
+user_map = {}
+for idx, row in enumerate(users_df.itertuples(), start=1):
+    user_map[str(idx)] = {
+        "username": row.username,
+        "wallet_address": row.wallet_address
+    }
 
-book_documents = []
-for _, row in df_books.iterrows():
+
+# Carica CSV libri
+books_df = pd.read_csv("database/book.csv", sep=";")
+books_df["Year-Of-Publication"] = pd.to_numeric(
+    books_df["Year-Of-Publication"], errors="coerce"
+).fillna(0).astype(int)
+
+# Inserimento libri arricchiti con User e dataCreazione
+books_documents = []
+for _, row in books_df.iterrows():
+    user_info = user_map.get(str(row["UserID"]), {"username": None, "wallet_address": None})
     doc = {
         "ISBN": str(row["ISBN"]),
         "Book-Title": str(row["Book-Title"]),
@@ -34,46 +58,23 @@ for _, row in df_books.iterrows():
         "Year-Of-Publication": int(row["Year-Of-Publication"]),
         "Publisher": str(row["Publisher"]),
         "Image-URL-S": str(row["Image-URL-S"]),
-        "usato": bool(row["usato"]),                     # aggiunto
-        "dataCreazione": str(row["dataCreazione"]),      # aggiunto
-        "UserID": str(row["UserID"])                     # aggiunto
+        "Usato": row["usato"] == "True",
+        "DataCreazione": str(row["dataCreazione"]),
+        "User": user_info
     }
-    book_documents.append(doc)
+    books_documents.append(doc)
+if books_documents:
+    book_collection.insert_many(books_documents)
+print(f"Inseriti {len(books_documents)} libri arricchiti con utente e dataCreazione")
 
-if book_documents:
-    book_collection.insert_many(book_documents)
-    print(f"Inseriti {len(book_documents)} libri")
-else:
-    print("Nessun libro da inserire")
 
-# ===============================
-# CARICAMENTO USERS
-# ===============================
-df_users = pd.read_csv("database/users.csv", sep=";")
 
-users_documents = []
-for _, row in df_users.iterrows():
-    doc = {
-        "username": str(row["username"]),
-        "email": str(row["email"]),
-        "wallet_address": str(row["wallet_address"]),
-        
-    }
-    users_documents.append(doc)
 
-if users_documents:
-    users_collection.insert_many(users_documents)
-    print(f"Inseriti {len(users_documents)} utenti")
-else:
-    print("Nessun utente da inserire")
-
-# ===============================
-# CARICAMENTO TRANSACTIONS
-# ===============================
-df_txn = pd.read_csv("database/transaction.csv", sep=";")
+# Carica CSV transazioni
+transactions_df = pd.read_csv("database/transaction.csv", sep=";")
 
 transactions_documents = []
-for _, row in df_txn.iterrows():
+for _, row in transactions_df.iterrows():
     doc = {
         "TransactionID": str(row["TransactionID"]),
         "UserID": str(row["UserID"]),
@@ -84,9 +85,6 @@ for _, row in df_txn.iterrows():
         "timestamp": str(row["timestamp"])
     }
     transactions_documents.append(doc)
-
 if transactions_documents:
     transactions_collection.insert_many(transactions_documents)
-    print(f"Inserite {len(transactions_documents)} transazioni")
-else:
-    print("Nessuna transazione da inserire")
+print(f"Inserite {len(transactions_documents)} transazioni")
