@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 contract BookStore {
     struct Book {
         string isbn;
-        string owner; // wallet address come stringa
+        address owner; // wallet address come stringa
         uint256 price; // prezzo in wei
         bool sold;
     }
@@ -17,7 +17,7 @@ contract BookStore {
     function addBook(string memory bookId, uint256 price) public {
         books[bookId] = Book({
             isbn: bookId,
-            owner: "",
+            owner: address(0),
             price: price,
             sold: false
         });
