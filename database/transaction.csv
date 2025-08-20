@@ -1,0 +1,6 @@
+"TransactionID";"UserID";"BookId";"amount";"currency";"status";"timestamp"
+"TXN001";"1";"5";"25.50";"ETH";"completed";"2025-08-20 14:35:12"
+"TXN002";"3";"2";"0.01";"ETH";"pending";"2025-08-20 15:01:48"
+"TXN003";"7";"9";"40.00";"USD";"completed";"2025-08-19 11:20:05"
+"TXN004";"2";"1";"18.75";"EUR";"failed";"2025-08-18 19:44:37"
+"TXN005";"5";"3";"0.015";"ETH";"completed";"2025-08-20 09:22:10"
