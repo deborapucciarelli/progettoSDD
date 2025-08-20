@@ -2,6 +2,8 @@ from web3 import Web3
 import json
 from pymongo import MongoClient
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 # =======================
 # Connessione nodo Ganache
@@ -105,10 +107,14 @@ print(f"💰 Libro comprato: {tx_hash_buy.hex()}")
 # 3️⃣ Salvataggio su MongoDB
 # =======================
 # Placeholder: URI del tuo MongoDB Atlas o locale
-client = MongoClient(
-    "mongodb+srv://dbMD:progettoSDD@cluster0.cw4uk5y.mongodb.net/"
-    "?retryWrites=true&w=majority&appName=Cluster0"
-)
+# Carica le variabili dal .env
+load_dotenv()
+
+# Prendi l'URI dal .env
+MONGO_URI = os.getenv("MONGO_URI")
+
+# Connessione a MongoDB
+client = MongoClient(MONGO_URI)
 db = client["booksDB"]
 collection = db["transactions"]
 
