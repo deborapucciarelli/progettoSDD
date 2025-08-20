@@ -27,12 +27,23 @@
                     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                     walletAddress = accounts[0];
                     alert("Wallet connesso: " + walletAddress);
+
+                    // Rileva browser
+                    const userAgent = navigator.userAgent.toLowerCase();
+                    if (userAgent.includes("firefox")) {
+                        console.log("Stai usando Firefox con Metamask");
+                    } else if (userAgent.includes("chrome")) {
+                        console.log("Stai usando Chrome con Metamask");
+                    } else {
+                        console.log("Stai usando un browser non testato");
+                    }
+
                 } catch (err) {
                     console.error(err);
                     alert("Connessione wallet fallita");
                 }
             } else {
-                alert("Installa Metamask Chrome Extension!");
+                alert("Installa Metamask in Firefox o Chrome!");
             }
         };
 
@@ -47,7 +58,7 @@
 
             const data = {
                 walletAddress,
-                username: walletAddress,  // usiamo wallet come username
+                username: walletAddress,
                 isbn: document.getElementById("isbn").value,
                 title: document.getElementById("title").value,
                 author: document.getElementById("author").value,
