@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aggiungi Libro</title>
+</head>
+<body>
+    <h1>Aggiungi Libro</h1>
+    <button id="connectWallet">Connetti Metamask</button>
+    <form id="bookForm">
+        ISBN: <input type="text" id="isbn"><br>
+        Titolo: <input type="text" id="title"><br>
+        Autore: <input type="text" id="author"><br>
+        Anno: <input type="number" id="year"><br>
+        Publisher: <input type="text" id="publisher"><br>
+        URL Immagine: <input type="text" id="imageUrl"><br>
+        Usato: <input type="checkbox" id="usato"><br>
+        <button type="submit">Aggiungi Libro</button>
+    </form>
+
+    <script>
+        let walletAddress = "";
+
+        // Connetti Metamask
+        document.getElementById("connectWallet").onclick = async () => {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                    walletAddress = accounts[0];
+                    alert("Wallet connesso: " + walletAddress);
+                } catch (err) {
+                    console.error(err);
+                    alert("Connessione wallet fallita");
+                }
+            } else {
+                alert("Installa Metamask Chrome Extension!");
+            }
+        };
+
+        // Invio form
+        document.getElementById("bookForm").onsubmit = async (e) => {
+            e.preventDefault();
+
+            if (!walletAddress) {
+                alert("Devi prima connettere Metamask!");
+                return;
+            }
+
+            const data = {
+                walletAddress,
+                username: walletAddress,  // usiamo wallet come username
+                isbn: document.getElementById("isbn").value,
+                title: document.getElementById("title").value,
+                author: document.getElementById("author").value,
+                year: document.getElementById("year").value,
+                publisher: document.getElementById("publisher").value,
+                imageUrl: document.getElementById("imageUrl").value,
+                usato: document.getElementById("usato").checked
+            };
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/add_book", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(JSON.stringify(result));
+            } catch (err) {
+                console.error(err);
+                alert("Errore nella richiesta al server");
+            }
+        };
+    </script>
+</body>
+</html>
