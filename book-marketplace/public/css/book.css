@@ -1,0 +1,102 @@
+/* Font e sfondo generale */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Titolo pagina */
+.home-container h1 {
+  margin-bottom: 40px;
+}
+
+/* Sezione libro */
+.books-section {
+  display: flex;
+  justify-content: center;
+}
+
+/* Contenitore del libro */
+.book-container {
+  background: linear-gradient(135deg, rgba(255,140,0,0.3), rgba(255,215,0,0.3));
+  display: flex;
+  flex-direction: column; /* immagine sopra, dettagli sotto */
+  gap: 20px;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.6);
+}
+
+/* Immagine del libro */
+.book-image img {
+  width: 25%;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease;
+}
+
+.book-image img:hover {
+  transform: scale(1.05);
+}
+
+/* Dettagli libro */
+.book-details h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 24px;
+  color: #fff8dc;
+}
+
+.book-details p {
+  margin: 6px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #fff;
+}
+
+.book-details p strong {
+  color: #ffd700;
+}
+
+/* Bottone acquista */
+#buyBtn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+#buyBtn:hover {
+  background: linear-gradient(135deg, #feb47b, #ff7e5f);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .book-container {
+    padding: 20px;
+  }
+
+  .book-details h2 {
+    font-size: 20px;
+  }
+}

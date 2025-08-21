@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Dettaglio Libro</title>
+  <link rel="stylesheet" href="/css/book.css">
+  <link rel="stylesheet" href="css/navbar.css">
+</head>
+<body>
+
+    <div id="navbar"></div>
+  <script src="js/loadNavbar.js"></script>
+
+  <div class="home-container">
+    <h1>Dettaglio Libro</h1>
+  </div>
+
+  <div class="books-section" id="bookContainer">
+    <!-- Dettagli libro verranno inseriti qui -->
+  </div>
+
+  <script>
+    const bookId = window.location.pathname.split('/').pop();
+
+    async function loadBook() {
+      const res = await fetch(`/api/books/${bookId}`);
+      if (!res.ok) {
+        document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>';
+        return;
+      }
+      const book = await res.json();
+
+      document.getElementById('bookContainer').innerHTML = `
+        <div class="book-container">
+          <div class="book-image">
+            <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
+          </div>
+          <div class="book-details">
+            <h2>${book['Book-Title']}</h2>
+            <p><strong>Autore:</strong> ${book['Book-Author']}</p>
+            <p><strong>Anno:</strong> ${book['Year-Of-Publication']}</p>
+            <p><strong>Usato:</strong> ${book.Usato ? 'Sì' : 'No'}</p>
+            <p><strong>Utente:</strong> ${book.User?.username || 'N/A'}</p>
+            <button id="buyBtn" onclick="acquistaLibro('${book._id}')">Acquista</button>
+          </div>
+        </div>
+      `;
+    }
+
+    loadBook();
+
+    function acquistaLibro(id) {
+      alert(`Hai acquistato il libro con ID: ${id}`);
+    }
+  </script>
+</body>
+</html>

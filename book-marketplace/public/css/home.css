@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Blocco home/wallet */
+.home-container {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  max-width: 500px;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+h1 {
+  margin-bottom: 20px;
+  font-size: 26px;
+}
+
+p {
+  font-size: 16px;
+}
+
+#walletInfo {
+  margin-top: 20px;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+/* Blocco libri */
+.books-section {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 15px;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.books-section h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+/* Griglia libri */
+.books-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.book-card {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.book-card:hover {
+  transform: scale(1.05);
+}
+
+.book-card img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.book-link {
+  color: #fff;
+  text-decoration: none;
+}
+
+.book-link h3 {
+  margin: 0;
+  font-size: 16px;
+}

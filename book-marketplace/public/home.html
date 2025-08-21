@@ -3,20 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <title>Home Page</title>
-  <link rel="stylesheet" href="file css/home.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/navbar.css">
 </head>
 <body>
+
+  <div id="navbar"></div>
+  <script src="js/loadNavbar.js"></script>
+
   <div class="home-container">
     <h1>Benvenuto nella Home Page</h1>
     <p class="wallet-info" id="walletInfo"></p>
+  </div>
 
+  <div class="books-section">
+    <h2>4 libri a caso</h2>
     <div class="books-container" id="booksContainer">
       <!-- Le card dei libri verranno inserite qui -->
     </div>
   </div>
 
   <script>
-    // Mostra wallet
     async function loadWallet() {
       let walletAddress = localStorage.getItem("walletAddress");
 
@@ -35,27 +42,23 @@
 
     loadWallet();
 
-   // Prendi libri da API e crea card
-  async function loadBooks() {
-    const res = await fetch('/api/books');   // ✅ usa la rotta corretta
-    const books = await res.json();
-  const container = document.getElementById('booksContainer');
+    async function loadBooks() {
+      const res = await fetch('/api/books');
+      const books = await res.json();
+      const container = document.getElementById('booksContainer');
 
-  books.forEach(book => {
-    const card = document.createElement('div');
-    card.className = 'book-card';
-    card.innerHTML = `
-      <img src="${book["Image-URL-S"]}" alt="${book["Book-Title"]}">
-      <h3>${book["Book-Title"]}</h3>
-      <p><strong>Autore:</strong> ${book["Book-Author"]}</p>
-      <p><strong>Anno:</strong> ${book["Year-Of-Publication"]}</p>
-      <p><strong>Usato:</strong> ${book["Usato"] ? 'Sì' : 'No'}</p>
-      <p><strong>Utente:</strong> ${book.User.username}</p>
-    `;
-    container.appendChild(card);
-  });
-}
-
+      books.forEach(book => {
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+          <a href="/book/${book._id}">
+            <img src="${book["Image-URL-S"]}" alt="${book["Book-Title"]}">
+            <h3>${book["Book-Title"]}</h3>
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
 
     loadBooks();
   </script>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -25,11 +25,11 @@ async function start() {
   try {
     await client.connect();
     db = client.db("booksDB");
-    console.log("MongoDB connesso");
+    console.log("✅ MongoDB connesso");
 
     app.listen(PORT, () => console.log(`Server avviato su http://localhost:${PORT}`));
   } catch (err) {
-    console.error(err);
+    console.error("❌ Errore avvio server:", err);
   }
 }
 
@@ -40,11 +40,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
-// API per prendere i libri (max 5)
+// Rotta dettaglio libro
+app.get('/book/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'book.html'));
+});
+
+// API per lista libri
 app.get('/api/books', async (req, res) => {
   try {
-    const books = await db.collection("book").find().limit(5).toArray();
-    console.log("Libri trovati:", books);   // 👈 debug
+    const books = await db.collection("book").find().limit(4).toArray();
     res.json(books);
   } catch (err) {
     console.error("Errore API:", err);
@@ -52,3 +56,14 @@ app.get('/api/books', async (req, res) => {
   }
 });
 
+// API per libro singolo
+app.get('/api/books/:id', async (req, res) => {
+  try {
+    const book = await db.collection("book").findOne({ _id: new ObjectId(req.params.id) });
+    if (!book) return res.status(404).json({ error: 'Libro non trovato' });
+    res.json(book);
+  } catch (err) {
+    console.error("Errore dettaglio libro:", err);
+    res.status(500).json({ error: 'Errore nel recupero del libro' });
+  }
+});
