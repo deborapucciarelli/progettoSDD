@@ -3,43 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Home Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #43cea2, #185a9d);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .home-container {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 40px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      max-width: 500px;
-      width: 100%;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 26px;
-    }
-
-    p {
-      font-size: 16px;
-    }
-
-    #walletInfo {
-      margin-top: 20px;
-      font-size: 14px;
-      word-break: break-word;
-    }
-  </style>
+  <!-- Collego il CSS esterno -->
+  <link rel="stylesheet" href="file css/home.css">
 </head>
 <body>
   <div class="home-container">
@@ -64,11 +29,9 @@
           "✅ Wallet connesso: " + walletAddress;
       } else {
         document.getElementById("walletInfo").innerHTML =
-          "❌ Nessun wallet connesso.<br> <a href='login.html' style='color: #f6851b;'>Torna al login</a>";
+          "❌ Nessun wallet connesso.<br> <a href='index.html' style='color: #f6851b;'>Torna al login</a>";
       }
     }
 
     loadWallet();
   </script>
-</body>
-</html>

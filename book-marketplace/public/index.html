@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Login con Metamask</title>
+  <!-- Collego il CSS esterno -->
+  <link rel="stylesheet" href="file css/index.css">
+</head>
+<body>
+  <div class="login-container">
+    <h1>Accedi con Metamask</h1>
+    <button id="connectWallet">Connetti Wallet</button>
+    <div id="walletInfo"></div>
+  </div>
+
+  <script>
+    let walletAddress = "";
+
+    document.getElementById("connectWallet").onclick = async () => {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          walletAddress = accounts[0];
+          localStorage.setItem("walletAddress", walletAddress); // 🔹 Salvo il wallet
+          window.location.href = "home.html"; // 🔹 Redirect alla Home
+        } catch (err) {
+          console.error(err);
+          alert("Connessione wallet fallita");
+        }
+      } else {
+        alert("Installa Metamask in Firefox o Chrome!");
+      }
+    };
+  </script>
+</body>
+</html>
