@@ -37,7 +37,7 @@ book = {
 # Dati utente che effettua l'operazione
 user = {
     "username": "alice",  # Placeholder: username dell'utente
-    "wallet_address": "0x73A339bcE0dB1D628Ad4d47AA8EBfdC4423f0291"  # Placeholder: indirizzo wallet Ethereum dell'utente
+    "wallet_address": "0xDC42098bB91898eC2f419857C916cC78C23301dA"  # Placeholder: indirizzo wallet Ethereum dell'utente
 }
 
 # Prezzo del libro in ETH
@@ -45,7 +45,7 @@ amount_eth = 0.01  # Placeholder: puoi cambiare il prezzo a piacere
 
 # Private key per firmare le transazioni
 # ⚠️ Placeholder: la tua private key del wallet sopra. Non condividerla mai pubblicamente
-private_key = "0xd9604a2e7f49606215a24d483fcdf40b8b405b3befcf74dc8b1308b3c088c641"
+private_key = "0x0f483c9b300aff4702a11227d749ced97d09bd6ddab66a6cdd808187051371ab"
 
 # =======================
 # Genera bookId coerente
