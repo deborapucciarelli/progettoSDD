@@ -20,5 +20,8 @@ __pycache__/
 # Ignora roba di VS Code
 .vscode/
 
+# Altro
+package.json
+package-lock.json
 
 
