@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Home Page</title>
-  <!-- Collego il CSS esterno -->
   <link rel="stylesheet" href="file css/home.css">
 </head>
 <body>
   <div class="home-container">
     <h1>Benvenuto nella Home Page</h1>
-    <p id="walletInfo"></p>
+    <p class="wallet-info" id="walletInfo"></p>
+
+    <div class="books-container" id="booksContainer">
+      <!-- Le card dei libri verranno inserite qui -->
+    </div>
   </div>
 
   <script>
+    // Mostra wallet
     async function loadWallet() {
       let walletAddress = localStorage.getItem("walletAddress");
 
@@ -24,14 +28,36 @@
         }
       }
 
-      if (walletAddress) {
-        document.getElementById("walletInfo").innerHTML =
-          "✅ Wallet connesso: " + walletAddress;
-      } else {
-        document.getElementById("walletInfo").innerHTML =
-          "❌ Nessun wallet connesso.<br> <a href='index.html' style='color: #f6851b;'>Torna al login</a>";
-      }
+      document.getElementById("walletInfo").innerHTML = walletAddress 
+        ? `✅ Wallet connesso: ${walletAddress}` 
+        : `❌ Nessun wallet connesso.<br> <a href='index.html' style='color: #f6851b;'>Torna al login</a>`;
     }
 
     loadWallet();
+
+   // Prendi libri da API e crea card
+  async function loadBooks() {
+    const res = await fetch('/api/books');   // ✅ usa la rotta corretta
+    const books = await res.json();
+  const container = document.getElementById('booksContainer');
+
+  books.forEach(book => {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.innerHTML = `
+      <img src="${book["Image-URL-S"]}" alt="${book["Book-Title"]}">
+      <h3>${book["Book-Title"]}</h3>
+      <p><strong>Autore:</strong> ${book["Book-Author"]}</p>
+      <p><strong>Anno:</strong> ${book["Year-Of-Publication"]}</p>
+      <p><strong>Usato:</strong> ${book["Usato"] ? 'Sì' : 'No'}</p>
+      <p><strong>Utente:</strong> ${book.User.username}</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+
+    loadBooks();
   </script>
+</body>
+</html>

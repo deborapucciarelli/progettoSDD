@@ -1,11 +1,10 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
 import cors from 'cors';
-import path from 'path';               // ✅ importa path una sola volta
+import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-// 🔹 Carica il .env che si trova una cartella sopra
 dotenv.config({ path: path.resolve('../.env') });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,14 +13,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Serve i file statici (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connessione a MongoDB
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 let db;
@@ -29,7 +24,7 @@ let db;
 async function start() {
   try {
     await client.connect();
-    db = client.db("bookDB");
+    db = client.db("booksDB");
     console.log("MongoDB connesso");
 
     app.listen(PORT, () => console.log(`Server avviato su http://localhost:${PORT}`));
@@ -40,18 +35,20 @@ async function start() {
 
 start();
 
-// Rotte API
-app.get('/books', async (req, res) => {
-  const books = await db.collection("books").find().toArray();
-  res.json(books);
+// Rotta Home
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
-app.get('/books/search', async (req, res) => {
-  const { isbn, username } = req.query;
-  const query = {};
-  if (isbn) query.isbn = isbn;
-  if (username) query.username = username;
-
-  const books = await db.collection("books").find(query).toArray();
-  res.json(books);
+// API per prendere i libri (max 5)
+app.get('/api/books', async (req, res) => {
+  try {
+    const books = await db.collection("book").find().limit(5).toArray();
+    console.log("Libri trovati:", books);   // 👈 debug
+    res.json(books);
+  } catch (err) {
+    console.error("Errore API:", err);
+    res.status(500).json({ error: 'Errore nel recupero dei libri' });
+  }
 });
+
