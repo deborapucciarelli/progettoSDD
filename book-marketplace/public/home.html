@@ -18,14 +18,22 @@
     </div>
 
     <div class="books-section">
-      <h2>4 libri a caso</h2>
-      <div class="books-container" id="booksContainer">
-        <!-- Le card dei libri verranno inserite qui -->
+      <h2>La nostra selezione</h2>
+      <div class="books-container" id="booksContainer"></div>
+      <div class="show-all-container">
+        <button id="showAllBtn" class="catalog-btn">📚 Mostra tutto il catalogo</button>
       </div>
     </div>
   </div>
 
   <script>
+    // Redirect al catalogo
+    const showAllBtn = document.getElementById("showAllBtn");
+    showAllBtn.onclick = () => {
+      window.location.href = "/libri.html";
+    };
+
+    // Wallet
     async function loadWallet() {
       let walletAddress = localStorage.getItem("walletAddress");
 
@@ -39,17 +47,17 @@
 
       document.getElementById("walletInfo").innerHTML = walletAddress 
         ? `✅ Wallet connesso: ${walletAddress}` 
-        : `❌ Nessun wallet connesso.<br> <a href='index.html' style='color: #f6851b;'>Torna al login</a>`;
+        : `❌ Nessun wallet connesso.<br> <a href='/index.html' style='color: #f6851b;'>Torna al login</a>`;
     }
-
     loadWallet();
 
+    // Caricamento libri
     async function loadBooks() {
       const res = await fetch('/api/books');
       const books = await res.json();
       const container = document.getElementById('booksContainer');
 
-      books.forEach(book => {
+      books.slice(0, 4).forEach(book => {
         const card = document.createElement('div');
         card.className = 'book-card';
         card.innerHTML = `
@@ -61,7 +69,6 @@
         container.appendChild(card);
       });
     }
-
     loadBooks();
   </script>
 </body>

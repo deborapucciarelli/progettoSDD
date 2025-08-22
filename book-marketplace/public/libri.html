@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Tutti i Libri</title>
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/libri.css">
+</head>
+<body>
+
+  <div id="navbar"></div>
+  <script src="js/loadNavbar.js"></script>
+
+  <div class="page-content">
+    <div class="books-section">
+      <h2>Tutti i libri</h2>
+      <div class="books-container" id="allBooksContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    async function loadAllBooks() {
+      const res = await fetch('/api/books');
+      const books = await res.json();
+      const container = document.getElementById('allBooksContainer');
+
+      books.forEach(book => {
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+          <a href="/book/${book._id}">
+            <img src="${book["Image-URL-S"]}" alt="${book["Book-Title"]}">
+            <h3>${book["Book-Title"]}</h3>
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    loadAllBooks();
+  </script>
+</body>
+</html>

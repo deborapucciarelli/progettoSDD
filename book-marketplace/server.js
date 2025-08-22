@@ -45,10 +45,10 @@ app.get('/book/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'book.html'));
 });
 
-// API per lista libri
+// API per lista libri home
 app.get('/api/books', async (req, res) => {
   try {
-    const books = await db.collection("book").find().limit(4).toArray();
+    const books = await db.collection("book").find().toArray();
     res.json(books);
   } catch (err) {
     console.error("Errore API:", err);
