@@ -1,52 +1,81 @@
-/* navbar.css */
+/* Navbar principale */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  background-color: #1a1a1a; /* grigio scuro */
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  font-family: Arial, sans-serif;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1); /* trasparente, leggero bianco */
+  backdrop-filter: blur(8px); /* effetto sfocato dietro */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* leggero rilievo */
+  border-radius: 8px; /* angoli morbidi */
+  position: sticky;
+  top: 10px;
+  z-index: 1000;
 }
 
+/* Sezioni sinistra e destra */
 .nav-left, .nav-right {
   display: flex;
   align-items: center;
 }
 
-.nav-left .nav-btn {
+/* Bottoni navbar */
+.nav-btn {
   margin-right: 15px;
-  padding: 8px 15px;
-  background-color: #333;
-  color: #fff;
   text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  color: #fff; /* bianco */
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.3s;
 }
 
-.nav-left .nav-btn:hover {
-  background-color: #555;
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-.nav-right input[type="text"] {
-  padding: 7px 10px;
-  border-radius: 5px 0 0 5px;
+/* Input di ricerca */
+#searchInput {
+  padding: 5px 10px;
+  border-radius: 6px;
   border: none;
   outline: none;
-  width: 180px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  margin-right: 5px;
 }
 
-.nav-right button {
-  padding: 7px 12px;
-  border-radius: 0 5px 5px 0;
+/* Bottone di ricerca */
+#searchBtn {
+  padding: 5px 10px;
   border: none;
-  background-color: #f6851b; /* arancione */
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background 0.3s;
 }
 
-.nav-right button:hover {
-  background-color: #e67e22;
+#searchBtn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Placeholder bianco */
+#searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Adatta a schermi piccoli */
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nav-left, .nav-right {
+    flex-direction: column;
+    gap: 5px;
+  }
+  #searchInput {
+    width: 100%;
+  }
 }

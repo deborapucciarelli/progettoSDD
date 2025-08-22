@@ -1,3 +1,4 @@
+/* Stile globale */
 body {
   font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #6a11cb, #2575fc);
@@ -9,21 +10,62 @@ body {
   margin: 0;
 }
 
+/* Contenitore login */
 .login-container {
   background: rgba(0, 0, 0, 0.6);
-  padding: 40px;
+  padding: 40px 30px;
   border-radius: 15px;
   text-align: center;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   max-width: 400px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
+/* Titolo */
 h1 {
   margin-bottom: 20px;
   font-size: 24px;
 }
 
+/* Contenitore bottoni wallet */
+#walletButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#walletButtons button {
+  width: 100%;
+}
+
+/* Pulsante Ritorna alla Home */
+.home-button-container {
+  margin-top: 30px; /* distanza dai bottoni wallet */
+  text-align: center;
+}
+
+#homeBtn {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 10px;
+  border: none;
+  background-color: #f6851b;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#homeBtn:hover {
+  background-color: #e2761b;
+  transform: scale(1.05);
+}
+
+/* Bottoni wallet */
 button {
   background: #f6851b;
   border: none;
@@ -41,18 +83,9 @@ button:hover {
   transform: scale(1.05);
 }
 
+/* Info wallet opzionale */
 #walletInfo {
   margin-top: 20px;
   font-size: 14px;
   word-break: break-word;
-}
-
-#walletButtons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* distanza verticale tra i bottoni */
-}
-
-#walletButtons button {
-  width: 100%; /* i bottoni occupano tutta la larghezza del contenitore */
 }

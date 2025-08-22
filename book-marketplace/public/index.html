@@ -8,10 +8,24 @@
 <body>
   <div class="login-container">
     <h1 id="loginTitle">Accedi con Metamask</h1>
+    
+    <!-- Contenitore bottoni wallet -->
     <div id="walletButtons"></div>
+    
+    <!-- Contenitore pulsante Ritorna alla Home -->
+    <div class="home-button-container" id="homeBtnContainer" style="display:none;">
+      <button id="homeBtn">Ritorna alla Home</button>
+    </div>
   </div>
 
   <script>
+    const homeBtn = document.getElementById("homeBtn");
+    const homeBtnContainer = document.getElementById("homeBtnContainer");
+
+    homeBtn.onclick = () => {
+      window.location.href = "/home.html"; // path assoluto
+    };
+
     let walletAddress = localStorage.getItem("walletAddress") || "";
 
     async function getUsername(wallet) {
@@ -32,12 +46,13 @@
       container.innerHTML = "";
 
       if (walletAddress) {
-        const username = await getUsername(walletAddress);
+        // Mostra pulsante home solo se loggata
+        homeBtnContainer.style.display = "block";
 
-        // 🔹 Cambia titolo
+        const username = await getUsername(walletAddress);
         title.textContent = username ? `Ciao, ${username}` : "Benvenuto";
 
-        // 🔹 Bottone "Il mio profilo"
+        // Bottone "Il mio profilo"
         const profileBtn = document.createElement("button");
         profileBtn.textContent = "Il mio profilo";
         profileBtn.onclick = () => {
@@ -46,20 +61,22 @@
           }
         };
 
+        // Bottone logout
         const logoutBtn = document.createElement("button");
         logoutBtn.textContent = "Log out";
         logoutBtn.onclick = () => {
           localStorage.removeItem("walletAddress");
           walletAddress = "";
-          // Ripristina titolo originale
           title.textContent = "Accedi con Metamask";
+          homeBtnContainer.style.display = "none"; // nasconde pulsante home
           renderButtons();
         };
 
         container.appendChild(profileBtn);
         container.appendChild(logoutBtn);
       } else {
-        // 🔹 Titolo di default
+        // Non loggata → nasconde pulsante home
+        homeBtnContainer.style.display = "none";
         title.textContent = "Accedi con Metamask";
 
         const connectBtn = document.createElement("button");
@@ -71,7 +88,7 @@
               walletAddress = accounts[0];
               localStorage.setItem("walletAddress", walletAddress);
               renderButtons();
-              window.location.href = "home.html";
+              window.location.href = "/home.html";
             } catch (err) {
               console.error(err);
               alert("Connessione wallet fallita");
