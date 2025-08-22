@@ -1,0 +1,51 @@
+body {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+/* Profilo container */
+.profile-container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 15px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  font-family: Arial, sans-serif;
+}
+
+/* Titolo */
+.profile-container h1 {
+  font-size: 28px;
+  margin-bottom: 25px;
+  color: #f6851b;
+}
+
+/* Sezione dati utente */
+#profileData p {
+  font-size: 18px;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+/* Evidenziare le etichette */
+#profileData strong {
+  color: #ffd700; /* oro chiaro */
+}
+
+/* Mobile friendly */
+@media (max-width: 600px) {
+  .profile-container {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  #profileData p {
+    font-size: 16px;
+  }
+
+  .profile-container h1 {
+    font-size: 24px;
+  }
+}

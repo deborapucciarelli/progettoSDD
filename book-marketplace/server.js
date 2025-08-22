@@ -67,3 +67,53 @@ app.get('/api/books/:id', async (req, res) => {
     res.status(500).json({ error: 'Errore nel recupero del libro' });
   }
 });
+
+// API per recuperare username dal wallet
+app.get('/api/getUsername', async (req, res) => {
+  try {
+    const { wallet } = req.query;
+    if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
+
+    const user = await db.collection("users").findOne({ wallet_address: wallet });
+    if (!user) return res.status(404).json({ error: 'Utente non trovato' });
+
+    res.json({ username: user.username });
+  } catch (err) {
+    console.error("Errore API getUsername:", err);
+    res.status(500).json({ error: 'Errore nel recupero username' });
+  }
+});
+
+// Rotta profilo utente dinamica
+app.get('/utente/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await db.collection("users").findOne({ username });
+    if (!user) return res.status(404).send('Utente non trovato');
+
+    res.sendFile(path.join(process.cwd(), 'public', 'profilo.html'));
+  } catch (err) {
+    console.error("Errore rotta utente:", err);
+    res.status(500).send('Errore server');
+  }
+});
+
+// API per recuperare dati utente completi
+app.get('/api/getUserData', async (req, res) => {
+  try {
+    const { wallet } = req.query;
+    if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
+
+    const user = await db.collection("users").findOne({ wallet_address: wallet });
+    if (!user) return res.status(404).json({ error: 'Utente non trovato' });
+
+    res.json({
+      username: user.username,
+      email: user.email,
+      wallet_address: user.wallet_address
+    });
+  } catch (err) {
+    console.error("Errore API getUserData:", err);
+    res.status(500).json({ error: 'Errore nel recupero dati utente' });
+  }
+});

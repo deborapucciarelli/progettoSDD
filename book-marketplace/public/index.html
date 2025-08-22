@@ -3,34 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <title>Login con Metamask</title>
-  <!-- Collego il CSS esterno -->
-  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
   <div class="login-container">
-    <h1>Accedi con Metamask</h1>
-    <button id="connectWallet">Connetti Wallet</button>
-    <div id="walletInfo"></div>
+    <h1 id="loginTitle">Accedi con Metamask</h1>
+    <div id="walletButtons"></div>
   </div>
 
   <script>
-    let walletAddress = "";
+    let walletAddress = localStorage.getItem("walletAddress") || "";
 
-    document.getElementById("connectWallet").onclick = async () => {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-          walletAddress = accounts[0];
-          localStorage.setItem("walletAddress", walletAddress); // 🔹 Salvo il wallet
-          window.location.href = "home.html"; // 🔹 Redirect alla Home
-        } catch (err) {
-          console.error(err);
-          alert("Connessione wallet fallita");
-        }
-      } else {
-        alert("Installa Metamask in Firefox o Chrome!");
+    async function getUsername(wallet) {
+      try {
+        const response = await fetch(`/api/getUsername?wallet=${wallet}`);
+        if (!response.ok) throw new Error('Utente non trovato');
+        const data = await response.json();
+        return data.username;
+      } catch (err) {
+        console.error(err);
+        return null;
       }
-    };
+    }
+
+    async function renderButtons() {
+      const container = document.getElementById("walletButtons");
+      const title = document.getElementById("loginTitle");
+      container.innerHTML = "";
+
+      if (walletAddress) {
+        const username = await getUsername(walletAddress);
+
+        // 🔹 Cambia titolo
+        title.textContent = username ? `Ciao, ${username}` : "Benvenuto";
+
+        // 🔹 Bottone "Il mio profilo"
+        const profileBtn = document.createElement("button");
+        profileBtn.textContent = "Il mio profilo";
+        profileBtn.onclick = () => {
+          if (username) {
+            window.location.href = `/utente/${username}?wallet=${walletAddress}`;
+          }
+        };
+
+        const logoutBtn = document.createElement("button");
+        logoutBtn.textContent = "Log out";
+        logoutBtn.onclick = () => {
+          localStorage.removeItem("walletAddress");
+          walletAddress = "";
+          // Ripristina titolo originale
+          title.textContent = "Accedi con Metamask";
+          renderButtons();
+        };
+
+        container.appendChild(profileBtn);
+        container.appendChild(logoutBtn);
+      } else {
+        // 🔹 Titolo di default
+        title.textContent = "Accedi con Metamask";
+
+        const connectBtn = document.createElement("button");
+        connectBtn.textContent = "Connetti Wallet";
+        connectBtn.onclick = async () => {
+          if (window.ethereum) {
+            try {
+              const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+              walletAddress = accounts[0];
+              localStorage.setItem("walletAddress", walletAddress);
+              renderButtons();
+              window.location.href = "home.html";
+            } catch (err) {
+              console.error(err);
+              alert("Connessione wallet fallita");
+            }
+          } else {
+            alert("Installa Metamask in Firefox o Chrome!");
+          }
+        };
+
+        container.appendChild(connectBtn);
+      }
+    }
+
+    renderButtons();
   </script>
 </body>
 </html>

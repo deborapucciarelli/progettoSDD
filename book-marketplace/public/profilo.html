@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Profilo utente</title>
+  <link rel="stylesheet" href="/css/profilo.css">
+</head>
+<body>
+  <div class="profile-container">
+    <h1>Profilo utente</h1>
+    <div id="profileData">
+      Caricamento dati...
+    </div>
+  </div>
+
+  <script>
+    async function getUserData(wallet) {
+      try {
+        const response = await fetch(`/api/getUserData?wallet=${wallet}`);
+        if (!response.ok) throw new Error('Utente non trovato');
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    async function renderProfile() {
+      // Recupero wallet da query string
+      const params = new URLSearchParams(window.location.search);
+      const wallet = params.get('wallet');
+      const container = document.getElementById('profileData');
+
+      if (!wallet) {
+        container.textContent = 'Wallet mancante';
+        return;
+      }
+
+      const user = await getUserData(wallet);
+      if (!user) {
+        container.textContent = 'Utente non trovato';
+        return;
+      }
+
+      container.innerHTML = `
+        <p><strong>Username:</strong> ${user.username}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Wallet:</strong> ${user.wallet_address}</p>
+      `;
+    }
+
+    renderProfile();
+  </script>
+</body>
+</html>
