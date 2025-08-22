@@ -4,46 +4,65 @@
   <meta charset="UTF-8">
   <title>Profilo utente</title>
   <link rel="stylesheet" href="/css/profilo.css">
-<link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/navbar.css">
 </head>
 <body>
 
-    <div id="navbar"></div>
+  <div id="navbar"></div>
   <script src="/js/loadNavbar.js"></script>
+
   <div class="profile-container">
     <h1>Profilo utente</h1>
-    <div id="profileData">
-      Caricamento dati...
+    <div id="profileData">Caricamento dati...</div>
+
+    <div id="userBooks">
+      <h2>Libri caricati</h2>
+      <div class="books-container" id="booksContainer">Caricamento libri...</div>
     </div>
   </div>
 
   <script>
+    // Fetch dati utente
     async function getUserData(wallet) {
       try {
         const response = await fetch(`/api/getUserData?wallet=${wallet}`);
         if (!response.ok) throw new Error('Utente non trovato');
-        const data = await response.json();
-        return data;
+        return await response.json();
       } catch (err) {
         console.error(err);
         return null;
       }
     }
 
+    // Fetch libri caricati da un wallet
+    async function getUserBooks(wallet) {
+      try {
+        const response = await fetch(`/api/getBooksByWallet?wallet=${wallet}`);
+        if (!response.ok) throw new Error('Errore nel recupero dei libri');
+        return await response.json();
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    }
+
     async function renderProfile() {
-      // Recupero wallet da query string
       const params = new URLSearchParams(window.location.search);
       const wallet = params.get('wallet');
       const container = document.getElementById('profileData');
+      const booksContainer = document.getElementById('booksContainer');
 
       if (!wallet) {
         container.textContent = 'Wallet mancante';
+        booksContainer.textContent = '';
         return;
       }
 
+      // Dati utente
       const user = await getUserData(wallet);
       if (!user) {
         container.textContent = 'Utente non trovato';
+        booksContainer.textContent = '';
         return;
       }
 
@@ -52,6 +71,27 @@
         <p><strong>Email:</strong> ${user.email}</p>
         <p><strong>Wallet:</strong> ${user.wallet_address}</p>
       `;
+
+      // Libri utente
+      const books = await getUserBooks(wallet);
+      if (books.length === 0) {
+        booksContainer.textContent = 'Nessun libro caricato';
+        return;
+      }
+
+      booksContainer.innerHTML = '';
+books.forEach(book => {
+  const card = document.createElement('div');
+  card.className = 'book-card';
+  card.innerHTML = `
+    <a href="/book/${book._id}">
+      <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
+      <p>${book['Book-Title']}</p>
+      <small>${book['Book-Author']}</small>
+    </a>
+  `;
+  booksContainer.appendChild(card);
+});
     }
 
     renderProfile();

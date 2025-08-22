@@ -1,4 +1,4 @@
-// Carica la navbar
+// Carica la navbar dinamicamente
 async function loadNavbar() {
   const navbarContainer = document.getElementById('navbar');
   if (!navbarContainer) return;
@@ -9,18 +9,21 @@ async function loadNavbar() {
     const html = await res.text();
     navbarContainer.innerHTML = html;
 
-    // Eventi ricerca
+    // Eventi ricerca nella navbar
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
 
     if (searchBtn && searchInput) {
-      searchBtn.addEventListener('click', () => {
+      const navbarSearch = () => {
         const query = searchInput.value.trim();
-        if (query) window.location.href = `/search.html?q=${encodeURIComponent(query)}`;
-      });
+        if (!query) return alert("Inserisci un termine di ricerca!");
+        // Reindirizzo alla pagina search con parametro q
+        window.location.href = `/search?q=${encodeURIComponent(query)}`;
+      };
 
+      searchBtn.addEventListener('click', navbarSearch);
       searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') searchBtn.click();
+        if (e.key === 'Enter') navbarSearch();
       });
     }
 
@@ -29,5 +32,5 @@ async function loadNavbar() {
   }
 }
 
-// Chiama subito
+// Caricamento immediato
 loadNavbar();

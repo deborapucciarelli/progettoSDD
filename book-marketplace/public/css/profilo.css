@@ -49,3 +49,49 @@ body {
     font-size: 24px;
   }
 }
+
+/* Contenitore libri */
+#userBooks {
+  margin-top: 30px;
+}
+
+.books-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
+  justify-items: center;
+  padding: 10px;
+}
+
+/* Card libro più piccola */
+.book-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  color: #fff;
+  transition: transform 0.3s, box-shadow 0.3s;
+  width: 100px;        /* ridotta da 140px a 100px */
+  cursor: pointer;
+}
+
+.book-card img {
+  width: 100%;
+  height: 140px;       /* ridotta da 200px a 140px */
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.book-card p {
+  margin: 8px 5px;
+  font-size: 12px;     /* più piccolo */
+  font-weight: bold;
+  color: #ffd700;
+}
+
+/* Hover effect */
+.book-card:hover {
+  transform: translateY(-3px);    /* leggermente minore per card più piccola */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}

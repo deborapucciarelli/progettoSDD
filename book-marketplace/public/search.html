@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Ricerca</title>
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/search.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <script src="js/loadNavbar.js"></script>
+
+  <div class="page-content">
+    <div class="search-bar">
+      <input type="text" id="searchInputPage" placeholder="Cerca libri o utenti...">
+      <button id="searchBtnPage">🔍 Cerca</button>
+    </div>
+
+    <div class="results-section" id="booksResults">
+      <h2>Libri trovati</h2>
+      <div class="results-container" id="booksContainer"></div>
+    </div>
+
+    <div class="results-section" id="usersResults">
+      <h2>Utenti trovati</h2>
+      <div class="results-container" id="usersContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const inputPage = document.getElementById("searchInputPage");
+    const searchBtnPage = document.getElementById("searchBtnPage");
+
+    async function doSearch(query) {
+      if (!query) return alert("Inserisci un termine di ricerca!");
+
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        document.getElementById("booksContainer").innerHTML = "";
+        document.getElementById("usersContainer").innerHTML = "";
+
+        document.querySelector("#booksResults h2").textContent =
+          `${data.books.length} libri trovati per "${query}"`;
+        document.querySelector("#usersResults h2").textContent =
+          `${data.users.length} utenti trovati per "${query}"`;
+
+        data.books.forEach(book => {
+          const card = document.createElement("div");
+          card.className = "result-card";
+          card.innerHTML = `
+            <a href="/book/${book._id}">
+              <img src="${book["Image-URL-S"]}" alt="${book["Book-Title"]}">
+              <p>${book["Book-Title"]}</p>
+            </a>
+          `;
+          document.getElementById("booksContainer").appendChild(card);
+        });
+
+        data.users.forEach(user => {
+          const card = document.createElement("div");
+          card.className = "result-card";
+          card.innerHTML = `
+            <a href="#" class="user-link" data-username="${user.username}">
+              <p>👤 ${user.username}</p>
+            </a>
+          `;
+          document.getElementById("usersContainer").appendChild(card);
+        });
+
+        document.querySelectorAll(".user-link").forEach(link => {
+          link.addEventListener("click", async e => {
+            e.preventDefault();
+            const username = link.dataset.username.trim();
+            try {
+              const res = await fetch(`/api/getWalletByUsername?username=${encodeURIComponent(username)}`);
+              const data = await res.json();
+              if (!data.wallet) throw new Error('Wallet non trovato');
+              window.location.href = `/utente/${encodeURIComponent(username)}?wallet=${encodeURIComponent(data.wallet)}`;
+            } catch (err) {
+              console.error(err);
+              alert("Errore nel caricamento del profilo");
+            }
+          });
+        });
+
+      } catch (err) {
+        console.error("Errore ricerca:", err);
+        alert("Errore durante la ricerca, controlla la console.");
+      }
+    }
+
+    searchBtnPage.addEventListener("click", () => doSearch(inputPage.value.trim()));
+    inputPage.addEventListener("keypress", e => { if (e.key === "Enter") doSearch(inputPage.value.trim()); });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("q");
+      if (q) {
+        inputPage.value = q;
+        doSearch(q);
+      }
+    });
+  </script>
+</body>
+</html>
