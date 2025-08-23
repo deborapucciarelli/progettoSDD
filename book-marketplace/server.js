@@ -50,7 +50,8 @@ app.get('/api/books', async (req, res) => {
 // Libro singolo
 app.get('/api/books/:id', async (req, res) => {
   try {
-    const book = await db.collection("book").findOne({ _id: new ObjectId(req.params.id) });
+    const bookId = req.params.id;
+    const book = await db.collection("book").findOne({ _id: bookId });
     if (!book) return res.status(404).json({ error: 'Libro non trovato' });
     res.json(book);
   } catch (err) {
@@ -227,6 +228,26 @@ app.put('/api/updateUser', async (req, res) => {
   } catch (err) {
     console.error("Errore in updateUser:", err);
     res.status(500).json({ error: "Errore interno server: " + err.message });
+  }
+});
+
+// Aggiungi libro
+app.post('/api/addBook', async (req, res) => {
+  try {
+    const book = req.body;
+    if(!book || !book._id || !book.ISBN || !book.User?.wallet_address) {
+      return res.status(400).json({ error: "Dati libro incompleti" });
+    }
+
+    // Controlla se libro esiste già
+    const existing = await db.collection("book").findOne({ _id: book._id });
+    if(existing) return res.status(409).json({ error: "Libro già presente" });
+
+    await db.collection("book").insertOne(book);
+    res.json({ success: true, book });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: "Errore aggiunta libro" });
   }
 });
 

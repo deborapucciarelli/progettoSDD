@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/css/aggiungiLibro.css">
+  <title>Aggiungi Libro</title>
+</head>
+<body>
+  <h1>Aggiungi un nuovo libro</h1>
+  <form id="addBookForm">
+    <label>ISBN:<input type="text" name="ISBN" required></label><br>
+    <label>Titolo:<input type="text" name="Book-Title" required></label><br>
+    <label>Autore:<input type="text" name="Book-Author" required></label><br>
+    <label>Anno pubblicazione:<input type="number" name="Year-Of-Publication" required></label><br>
+    <label>Editore:<input type="text" name="Publisher" required></label><br>
+    <label>URL Immagine:<input type="text" name="Image-URL-S" required></label><br>
+    <label>Usato:
+      <input type="checkbox" name="Usato">
+    </label><br>
+    <button type="submit">Aggiungi libro</button>
+  </form>
+
+  <script>
+    const wallet = localStorage.getItem("walletAddress");
+
+    function getCurrentDateTimeString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+    }
+
+    document.getElementById("addBookForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+
+      const book = {
+        ISBN: form.ISBN.value.trim(),
+        "Book-Title": form["Book-Title"].value.trim(),
+        "Book-Author": form["Book-Author"].value.trim(),
+        "Year-Of-Publication": parseInt(form["Year-Of-Publication"].value),
+        Publisher: form.Publisher.value.trim(),
+        "Image-URL-S": form["Image-URL-S"].value.trim(),
+        Usato: form.Usato.checked,
+        DataCreazione: getCurrentDateTimeString(),
+        User: { wallet_address: wallet }
+      };
+
+      // Genera _id come ISBN + username + data e ora creazione
+      const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
+      const user = await resUser.json();
+      book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
+
+      const res = await fetch("/api/addBook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(book)
+      });
+
+      const data = await res.json();
+      if(res.ok) {
+        alert("Libro aggiunto con successo!");
+        // Redirect alla pagina profilo utente usando wallet
+        window.location.href = `/utente/${user.username}?wallet=${wallet}`;
+      } else {
+        alert("Errore: " + data.error);
+      }
+    });
+  </script>
+</body>
+</html>

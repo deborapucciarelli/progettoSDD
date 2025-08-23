@@ -16,7 +16,10 @@
     <div id="profileData">Caricamento dati...</div>
 
     <div id="userBooks">
-      <h2>Libri caricati</h2>
+      <h2>
+        Libri caricati
+        <button id="addBookBtn" title="Aggiungi nuovo libro">+</button>
+      </h2>
       <div class="books-container" id="booksContainer">Caricamento libri...</div>
     </div>
   </div>
@@ -66,7 +69,6 @@
 
         const data = await res.json();
         return { success: res.ok && data.success, user: data.user || null };
-
       } catch (err) {
         console.error("Fetch updateUser fallita:", err);
         return { success: false, user: null };
@@ -77,6 +79,7 @@
     function renderUser(user) {
       const container = document.getElementById("profileData");
       container.innerHTML = "";
+
       const isOwner = currentWallet && (user.wallet_address.toLowerCase() === currentWallet.toLowerCase());
 
       function createEditableField(label, field, value) {
@@ -120,18 +123,12 @@
             saveBtn.onclick = async () => {
               const newValue = input.value.trim();
               if(!newValue) return;
-
               if(field === "email") {
                 const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if(!regex.test(newValue)) return;
               }
-
               const result = await updateUser(user.wallet_address, field, newValue);
-
-              if(result.success) {
-                // Aggiorna la pagina completa
-                window.location.reload();
-              }
+              if(result.success) window.location.reload();
             };
 
             p.replaceChild(input, span);
@@ -150,20 +147,19 @@
       const walletP = document.createElement("p");
       walletP.innerHTML = `<strong>Wallet:</strong> ${user.wallet_address}`;
       container.appendChild(walletP);
+
+      // --- Pulsante aggiungi libro ---
+      const addBtn = document.getElementById("addBookBtn");
+      if(isOwner) {
+        addBtn.onclick = () => window.location.href = "/aggiungiLibro.html";
+        addBtn.style.display = "inline-block"; // assicurati sia visibile
+      } else {
+        addBtn.style.display = "none";
+      }
     }
 
-    // --- Render pagina completa ---
-    async function renderProfile() {
-      const params = new URLSearchParams(window.location.search);
-      const wallet = params.get("wallet");
-
-      if(!wallet) return;
-
-      const user = await getUserData(wallet);
-      if(!user) return;
-
-      renderUser(user);
-
+    // --- Render libri ---
+    async function renderBooks(wallet) {
       const books = await getUserBooks(wallet);
       const booksContainer = document.getElementById("booksContainer");
       booksContainer.innerHTML = "";
@@ -185,6 +181,19 @@
         `;
         booksContainer.appendChild(card);
       });
+    }
+
+    // --- Render pagina completa ---
+    async function renderProfile() {
+      const params = new URLSearchParams(window.location.search);
+      const wallet = params.get("wallet");
+      if(!wallet) return;
+
+      const user = await getUserData(wallet);
+      if(!user) return;
+
+      renderUser(user);
+      await renderBooks(wallet);
     }
 
     renderProfile();

@@ -2,21 +2,16 @@ import pandas as pd
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+from datetime import datetime
 
 # ==============================
 # Connessione a MongoDB Atlas
 # ==============================
-# Carica le variabili dal .env
 load_dotenv()
-
-# Prendi l'URI dal .env
 MONGO_URI = os.getenv("MONGO_URI")
-
-# Connessione a MongoDB
 client = MongoClient(MONGO_URI)
 db = client["booksDB"]
 
-# Collezioni
 book_collection = db["book"]
 users_collection = db["users"]
 transactions_collection = db["transactions"]
@@ -66,10 +61,26 @@ books_df["Year-Of-Publication"] = pd.to_numeric(
     books_df["Year-Of-Publication"], errors="coerce"
 ).fillna(0).astype(int)
 
+def format_datetime(dt_str):
+    """Converte la stringa della data in formato YYYY-MM-DD_HH-MM-SS"""
+    try:
+        dt = pd.to_datetime(dt_str)
+    except Exception:
+        dt = datetime.now()
+    return dt.strftime("%Y-%m-%d_%H-%M-%S")
+
 books_documents = []
 for _, row in books_df.iterrows():
-    user_info = user_map.get(row["UserID"], {"username": None, "wallet_address": None})
+    user_info = user_map.get(row["UserID"], {"username": "N-A", "wallet_address": None})
+    
+    # Data creazione come datetime con ora precisa
+    data_creazione = format_datetime(row.get("dataCreazione", ""))
+    
+    # Genera _id nello stesso formato della tua app
+    _id = f"{row['ISBN']}_{user_info['username']}_{data_creazione}"
+    
     doc = {
+        "_id": _id,
         "ISBN": str(row["ISBN"]),
         "Book-Title": str(row["Book-Title"]),
         "Book-Author": str(row["Book-Author"]),
@@ -77,19 +88,18 @@ for _, row in books_df.iterrows():
         "Publisher": str(row["Publisher"]),
         "Image-URL-S": str(row["Image-URL-S"]),
         "Usato": str(row["usato"]).lower() == "true",
-        "DataCreazione": str(row["dataCreazione"]),
+        "DataCreazione": data_creazione,
         "User": user_info,
     }
     books_documents.append(doc)
 
 if books_documents:
     book_collection.insert_many(books_documents)
-print(f"✅ Inseriti {len(books_documents)} libri arricchiti con utente e dataCreazione")
+print(f"✅ Inseriti {len(books_documents)} libri con ID compatibile app")
 
 # ==============================
 # Caricamento transazioni
 # ==============================
-
 transactions_df = pd.read_csv("database/transaction.csv", sep=";")
 
 transactions_documents = []
@@ -107,7 +117,7 @@ for _, row in transactions_df.iterrows():
         },
         "amount": float(row["amount"]),
         "currency": str(row["currency"]),
-        "status": str(row["status"]),  # solo "completed" o "failed"
+        "status": str(row["status"]),
         "timestamp": str(row["timestamp"])
     }
     transactions_documents.append(doc)

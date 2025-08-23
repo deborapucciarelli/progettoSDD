@@ -150,3 +150,41 @@ input.edit-input {
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
+
+/* Bottone + aggiungi libro */
+#addBookBtn {
+  background: linear-gradient(135deg, #f6851b, #ff9800);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Hover effetto glow */
+#addBookBtn:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 20px rgba(246,133,27,0.7), 0 0 10px rgba(255,152,0,0.6);
+}
+
+/* Focus (per accessibilità) */
+#addBookBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(246,133,27,0.5);
+}
+
+/* Mobile adattamento */
+@media (max-width: 600px) {
+  #addBookBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+}
