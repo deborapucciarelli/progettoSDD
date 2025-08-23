@@ -1,13 +1,7 @@
 "username";"email";"wallet_address"
-"alice";"alice@example.com";"0xAbC1234567890DefABC1234567890defABC12345"
-"bob";"bob@example.com";"0xBcd2345678901EfABC2345678901efABC234567"
-"carol";"carol@example.com";"0xCde3456789012Fabc3456789012fABC345678901"
-"dave";"dave@example.com";"0xDef4567890123Abc4567890123aBC45678901234"
-"eve";"eve@example.com";"0xEfg5678901234Bcd5678901234bCD56789012345"
-"frank";"frank@example.com";"0xFgh6789012345Cde6789012345cDE67890123456"
-"grace";"grace@example.com";"0xGhi7890123456Def7890123456dEF78901234567"
-"heidi";"heidi@example.com";"0xHij8901234567Efg8901234567EfG89012345678"
-"ivan";"ivan@example.com";"0xIjk9012345678Fgh9012345678FgH90123456789"
-"judy";"judy@example.com";"0xJkl0123456789Ghi0123456789GhI01234567890"
-
+"alice0";"alice@example.com";"0xDC42098bB91898eC2f419857C916cC78C23301dA"
+"bob1";"bob@example.com";"0x0a578aCd9291A13440ec02F0dD0C67673003A9AC"
+"carol2";"carol@example.com";"0xC4CA1e4BCceb3BAaea373F1a2EE5eC2939c75EF2"
+"dave3";"dave@example.com";"0xCe45D2F5Bb68790cf811Deef2b62D45b45E3FaD4"
+"eve4";"eve@example.com";"0xe3FEf91d6daA4fd73ceE4a60132a5C25d8ED056d"
 
