@@ -272,6 +272,33 @@ app.delete('/api/deleteUser', async (req, res) => {
   }
 });
 
+// DELETE libro singolo
+app.delete('/api/deleteBook', async (req, res) => {
+  try {
+    const { _id } = req.body;
+    if (!_id) return res.status(400).json({ error: "ID libro mancante" });
+
+    // Controlla se il libro esiste
+    const book = await db.collection("book").findOne({ _id });
+    if (!book) return res.status(404).json({ error: "Libro non trovato" });
+
+    // Controllo proprietà: solo il proprietario può cancellare
+    const currentWallet = req.headers['wallet-address']?.toLowerCase() || null;
+    const bookWallet = book.User?.wallet_address?.toLowerCase() || (_id.split('_')[2] || '').toLowerCase();
+    
+    if (currentWallet && currentWallet !== bookWallet) {
+      return res.status(403).json({ error: "Non sei autorizzato a cancellare questo libro" });
+    }
+
+    await db.collection("book").deleteOne({ _id });
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Errore nella cancellazione del libro" });
+  }
+});
+
 /* ------------------- STATIC FILES ------------------- */
 app.use(express.static(path.join(__dirname, 'public')));
 

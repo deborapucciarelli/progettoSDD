@@ -100,3 +100,17 @@ body {
     font-size: 20px;
   }
 }
+
+#deleteBtn {
+  display: inline-block;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 22px;
+  color: #fff8dc; /* colore chiaro, uniforme al titolo */
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+#deleteBtn:hover {
+  color: #ff5555; /* leggero rosso al passaggio del mouse */
+  transform: scale(1.2);
+}

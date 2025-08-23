@@ -5,10 +5,47 @@
   <title>Dettaglio Libro</title>
   <link rel="stylesheet" href="/css/book.css">
   <link rel="stylesheet" href="/css/navbar.css">
+  <style>
+    /* Pulsante trash a lato del titolo */
+    #deleteBtn {
+      display: inline-block;
+      margin-left: 10px;
+      cursor: pointer;
+      font-size: 22px;
+      color: #fff8dc; /* colore chiaro, uniforme al titolo */
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    #deleteBtn:hover {
+      color: #ff5555; /* leggero rosso al passaggio del mouse */
+      transform: scale(1.2);
+    }
+
+    /* Bottone acquista */
+    #buyBtn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #ff7e5f, #feb47b);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    #buyBtn:hover {
+      background: linear-gradient(135deg, #feb47b, #ff7e5f);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+  </style>
 </head>
 <body>
 
-    <div id="navbar"></div>
+  <div id="navbar"></div>
   <script src="/js/loadNavbar.js"></script>
 
   <div class="home-container">
@@ -20,38 +57,77 @@
   </div>
 
   <script>
+    const currentWallet = (localStorage.getItem("walletAddress") || "").toLowerCase();
     const bookId = window.location.pathname.split('/').pop();
 
     async function loadBook() {
-      const res = await fetch(`/api/books/${bookId}`);
-      if (!res.ok) {
-        document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>';
-        return;
-      }
-      const book = await res.json();
+      try {
+        const res = await fetch(`/api/books/${bookId}`);
+        if (!res.ok) {
+          document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>';
+          return;
+        }
+        const book = await res.json();
 
-      document.getElementById('bookContainer').innerHTML = `
-        <div class="book-container">
-          <div class="book-image">
-            <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
+        const bookWallet = (book.User?.wallet_address || "").toLowerCase();
+        const isOwner = currentWallet && bookWallet && currentWallet === bookWallet;
+
+        const container = document.getElementById('bookContainer');
+        container.innerHTML = `
+          <div class="book-container">
+            <div class="book-image">
+              <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
+            </div>
+            <div class="book-details">
+              <h2>
+                ${book['Book-Title']}
+                ${isOwner ? '<span id="deleteBtn" title="Elimina libro">🗑️</span>' : ''}
+              </h2>
+              <p><strong>Autore:</strong> ${book['Book-Author']}</p>
+              <p><strong>Anno:</strong> ${book['Year-Of-Publication']}</p>
+              <p><strong>Usato:</strong> ${book.Usato ? 'Sì' : 'No'}</p>
+              <p><strong>Utente:</strong> ${book.User?.username || 'N/A'}</p>
+              <button id="buyBtn">Acquista</button>
+            </div>
           </div>
-          <div class="book-details">
-            <h2>${book['Book-Title']}</h2>
-            <p><strong>Autore:</strong> ${book['Book-Author']}</p>
-            <p><strong>Anno:</strong> ${book['Year-Of-Publication']}</p>
-            <p><strong>Usato:</strong> ${book.Usato ? 'Sì' : 'No'}</p>
-            <p><strong>Utente:</strong> ${book.User?.username || 'N/A'}</p>
-            <button id="buyBtn" onclick="acquistaLibro('${book._id}')">Acquista</button>
-          </div>
-        </div>
-      `;
+        `;
+
+        // Bottone acquista
+        document.getElementById("buyBtn").onclick = () => {
+          alert(`Hai acquistato il libro con ID: ${book._id}`);
+        };
+
+        // Bottone elimina (solo se owner)
+        if (isOwner) {
+          document.getElementById("deleteBtn").onclick = async () => {
+            if (!confirm("Sei sicuro di voler eliminare questo libro?")) return;
+            try {
+              const resDel = await fetch('/api/deleteBook', {
+                method: 'DELETE',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ _id: book._id })
+              });
+              const data = await resDel.json();
+              if (resDel.ok) {
+                alert("Libro eliminato con successo!");
+                window.location.href = '/utente/' + currentWallet + '?wallet=' + currentWallet;
+              } else {
+                alert("Errore: " + data.error);
+              }
+            } catch(err) {
+              console.error("Errore deleteBook:", err);
+              alert("Errore nella cancellazione del libro.");
+            }
+          };
+        }
+
+      } catch (err) {
+        console.error("Errore loadBook:", err);
+        document.getElementById('bookContainer').innerHTML = '<p>Errore caricamento libro.</p>';
+      }
     }
 
     loadBook();
-
-    function acquistaLibro(id) {
-      alert(`Hai acquistato il libro con ID: ${id}`);
-    }
   </script>
 </body>
 </html>

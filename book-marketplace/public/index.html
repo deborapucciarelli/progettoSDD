@@ -53,7 +53,7 @@
 
         // Bottone "Il mio profilo"
         const profileBtn = document.createElement("button");
-        profileBtn.textContent = "Il mio profilo";
+        profileBtn.textContent = "Dettagli profilo utente";
         profileBtn.onclick = () => {
           if (username) {
             window.location.href = `/utente/${username}?wallet=${walletAddress}`;
