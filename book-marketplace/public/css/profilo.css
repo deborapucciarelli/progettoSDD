@@ -15,46 +15,107 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Titolo */
 .profile-container h1 {
   font-size: 28px;
   margin-bottom: 25px;
   color: #f6851b;
 }
 
-/* Sezione dati utente */
 #profileData p {
   font-size: 18px;
   margin: 12px 0;
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-/* Evidenziare le etichette */
 #profileData strong {
-  color: #ffd700; /* oro chiaro */
+  color: #ffd700;
 }
 
-/* Mobile friendly */
+/* Bottoni edit */
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #ffd700;
+  transition: transform 0.2s;
+}
+.edit-btn:hover {
+  transform: scale(1.2);
+  color: #fff176;
+}
+
+/* Input editabile */
+input.edit-input {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  margin-left: 8px;
+}
+
+/* Bottone save */
+.save-btn {
+  background: #f6851b;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  transition: background 0.3s, transform 0.2s;
+}
+.save-btn:hover {
+  background: #ff9800;
+  transform: scale(1.05);
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #fff;
+  display: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#toast.show {
+  display: block;
+  opacity: 1;
+}
+#toast.success { background: #4CAF50; }
+#toast.error { background: #f44336; }
+
+/* Mobile */
 @media (max-width: 600px) {
   .profile-container {
     margin: 20px;
     padding: 20px;
   }
-
   #profileData p {
     font-size: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
-
   .profile-container h1 {
     font-size: 24px;
   }
 }
 
-/* Contenitore libri */
-#userBooks {
-  margin-top: 30px;
-}
-
+/* Libri */
+#userBooks { margin-top: 30px; }
 .books-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -62,8 +123,6 @@ body {
   justify-items: center;
   padding: 10px;
 }
-
-/* Card libro più piccola */
 .book-card {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
@@ -71,27 +130,23 @@ body {
   text-align: center;
   color: #fff;
   transition: transform 0.3s, box-shadow 0.3s;
-  width: 100px;        /* ridotta da 140px a 100px */
+  width: 100px;
   cursor: pointer;
 }
-
 .book-card img {
   width: 100%;
-  height: 140px;       /* ridotta da 200px a 140px */
+  height: 140px;
   object-fit: cover;
   display: block;
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
-
 .book-card p {
   margin: 8px 5px;
-  font-size: 12px;     /* più piccolo */
+  font-size: 12px;
   font-weight: bold;
   color: #ffd700;
 }
-
-/* Hover effect */
 .book-card:hover {
-  transform: translateY(-3px);    /* leggermente minore per card più piccola */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }

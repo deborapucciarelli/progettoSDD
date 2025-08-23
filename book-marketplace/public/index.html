@@ -23,7 +23,7 @@
     const homeBtnContainer = document.getElementById("homeBtnContainer");
 
     homeBtn.onclick = () => {
-      window.location.href = "/home.html"; // path assoluto
+      window.location.href = "/home.html";
     };
 
     let walletAddress = localStorage.getItem("walletAddress") || "";
@@ -46,7 +46,6 @@
       container.innerHTML = "";
 
       if (walletAddress) {
-        // Mostra pulsante home solo se loggata
         homeBtnContainer.style.display = "block";
 
         const username = await getUsername(walletAddress);
@@ -68,14 +67,13 @@
           localStorage.removeItem("walletAddress");
           walletAddress = "";
           title.textContent = "Accedi con Metamask";
-          homeBtnContainer.style.display = "none"; // nasconde pulsante home
+          homeBtnContainer.style.display = "none";
           renderButtons();
         };
 
         container.appendChild(profileBtn);
         container.appendChild(logoutBtn);
       } else {
-        // Non loggata → nasconde pulsante home
         homeBtnContainer.style.display = "none";
         title.textContent = "Accedi con Metamask";
 
@@ -86,6 +84,15 @@
             try {
               const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
               walletAddress = accounts[0];
+
+              // --- Creo utente su MongoDB se non esiste ---
+              await fetch("/api/loginOrRegister", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ wallet: walletAddress })
+});
+
+
               localStorage.setItem("walletAddress", walletAddress);
               renderButtons();
               window.location.href = "/home.html";

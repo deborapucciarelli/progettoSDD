@@ -22,76 +22,169 @@
   </div>
 
   <script>
-    // Fetch dati utente
+    const currentWallet = localStorage.getItem("walletAddress");
+    let currentEditing = null;
+
+    // --- Fetch dati utente ---
     async function getUserData(wallet) {
       try {
-        const response = await fetch(`/api/getUserData?wallet=${wallet}`);
-        if (!response.ok) throw new Error('Utente non trovato');
-        return await response.json();
-      } catch (err) {
-        console.error(err);
+        const res = await fetch(`/api/getUserData?wallet=${wallet}`);
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Utente non trovato");
+        }
+        return await res.json();
+      } catch(e) {
+        console.error(e);
         return null;
       }
     }
 
-    // Fetch libri caricati da un wallet
+    // --- Fetch libri ---
     async function getUserBooks(wallet) {
       try {
-        const response = await fetch(`/api/getBooksByWallet?wallet=${wallet}`);
-        if (!response.ok) throw new Error('Errore nel recupero dei libri');
-        return await response.json();
-      } catch (err) {
-        console.error(err);
+        const res = await fetch(`/api/getBooksByWallet?wallet=${wallet}`);
+        if (!res.ok) throw new Error("Errore nel recupero libri");
+        return await res.json();
+      } catch(e) {
+        console.error(e);
         return [];
       }
     }
 
+    // --- Update utente ---
+    async function updateUser(wallet, field, value) {
+      try {
+        const body = { wallet };
+        body[field] = value;
+
+        const res = await fetch("/api/updateUser", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        return { success: res.ok && data.success, user: data.user || null };
+
+      } catch (err) {
+        console.error("Fetch updateUser fallita:", err);
+        return { success: false, user: null };
+      }
+    }
+
+    // --- Render dati utente ---
+    function renderUser(user) {
+      const container = document.getElementById("profileData");
+      container.innerHTML = "";
+      const isOwner = currentWallet && (user.wallet_address.toLowerCase() === currentWallet.toLowerCase());
+
+      function createEditableField(label, field, value) {
+        const p = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+        p.appendChild(strong);
+
+        const span = document.createElement("span");
+        span.textContent = value;
+        p.appendChild(span);
+
+        if(isOwner) {
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "✏️";
+          editBtn.className = "edit-btn";
+
+          editBtn.onclick = () => {
+            if(currentEditing && currentEditing !== p) {
+              const oldInput = currentEditing.querySelector("input");
+              const oldSave = currentEditing.querySelector(".save-btn");
+              const oldEdit = currentEditing.querySelector(".edit-btn");
+              const oldSpan = currentEditing.querySelector("span");
+              if(oldInput && oldSave && oldEdit && oldSpan) {
+                currentEditing.replaceChild(oldSpan, oldInput);
+                currentEditing.replaceChild(oldEdit, oldSave);
+              }
+            }
+
+            currentEditing = p;
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = value;
+            input.className = "edit-input";
+
+            const saveBtn = document.createElement("button");
+            saveBtn.textContent = "💾";
+            saveBtn.className = "save-btn";
+
+            saveBtn.onclick = async () => {
+              const newValue = input.value.trim();
+              if(!newValue) return;
+
+              if(field === "email") {
+                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if(!regex.test(newValue)) return;
+              }
+
+              const result = await updateUser(user.wallet_address, field, newValue);
+
+              if(result.success) {
+                // Aggiorna la pagina completa
+                window.location.reload();
+              }
+            };
+
+            p.replaceChild(input, span);
+            p.replaceChild(saveBtn, editBtn);
+          };
+
+          p.appendChild(editBtn);
+        }
+
+        container.appendChild(p);
+      }
+
+      createEditableField("Username", "username", user.username);
+      createEditableField("Email", "email", user.email);
+
+      const walletP = document.createElement("p");
+      walletP.innerHTML = `<strong>Wallet:</strong> ${user.wallet_address}`;
+      container.appendChild(walletP);
+    }
+
+    // --- Render pagina completa ---
     async function renderProfile() {
       const params = new URLSearchParams(window.location.search);
-      const wallet = params.get('wallet');
-      const container = document.getElementById('profileData');
-      const booksContainer = document.getElementById('booksContainer');
+      const wallet = params.get("wallet");
 
-      if (!wallet) {
-        container.textContent = 'Wallet mancante';
-        booksContainer.textContent = '';
-        return;
-      }
+      if(!wallet) return;
 
-      // Dati utente
       const user = await getUserData(wallet);
-      if (!user) {
-        container.textContent = 'Utente non trovato';
-        booksContainer.textContent = '';
-        return;
-      }
+      if(!user) return;
 
-      container.innerHTML = `
-        <p><strong>Username:</strong> ${user.username}</p>
-        <p><strong>Email:</strong> ${user.email}</p>
-        <p><strong>Wallet:</strong> ${user.wallet_address}</p>
-      `;
+      renderUser(user);
 
-      // Libri utente
       const books = await getUserBooks(wallet);
-      if (books.length === 0) {
-        booksContainer.textContent = 'Nessun libro caricato';
+      const booksContainer = document.getElementById("booksContainer");
+      booksContainer.innerHTML = "";
+
+      if(books.length === 0) {
+        booksContainer.textContent = "Nessun libro caricato";
         return;
       }
 
-      booksContainer.innerHTML = '';
-books.forEach(book => {
-  const card = document.createElement('div');
-  card.className = 'book-card';
-  card.innerHTML = `
-    <a href="/book/${book._id}">
-      <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
-      <p>${book['Book-Title']}</p>
-      <small>${book['Book-Author']}</small>
-    </a>
-  `;
-  booksContainer.appendChild(card);
-});
+      books.forEach(book => {
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.innerHTML = `
+          <a href="/book/${book._id}">
+            <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
+            <p>${book['Book-Title']}</p>
+            <small>${book['Book-Author']}</small>
+          </a>
+        `;
+        booksContainer.appendChild(card);
+      });
     }
 
     renderProfile();

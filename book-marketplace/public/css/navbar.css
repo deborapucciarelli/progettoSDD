@@ -11,6 +11,7 @@
   position: sticky;
   top: 10px;
   z-index: 1000;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
 /* Sezioni sinistra e destra */

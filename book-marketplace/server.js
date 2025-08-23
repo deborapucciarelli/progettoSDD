@@ -154,6 +154,82 @@ app.get('/api/getBooksByWallet', async (req, res) => {
   }
 });
 
+// Se non esiste l'utente lo crea
+app.post('/api/loginOrRegister', async (req, res) => {
+  try {
+    const { wallet } = req.body;
+    if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
+
+    let user = await db.collection("users").findOne({ wallet_address: wallet });
+
+    if (!user) {
+      const newUser = {
+        username: "N-A",
+        email: "N-A",
+        wallet_address: wallet
+      };
+      const result = await db.collection("users").insertOne(newUser);
+      user = { ...newUser, _id: result.insertedId }; // <-- così hai l'id
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Errore login/registrazione" });
+  }
+});
+
+// Update utente
+app.put('/api/updateUser', async (req, res) => {
+  try {
+    const { wallet, username, email } = req.body;
+
+    if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
+
+    // Recupera l'utente tramite wallet (unico identificatore)
+    const user = await db.collection("users").findOne({ wallet_address: wallet });
+    if (!user) return res.status(404).json({ error: "Utente non trovato" });
+
+    const update = {};
+
+    // Controllo unicità username solo se modificato
+    if (username && username !== user.username) {
+      const existingUser = await db.collection("users").findOne({
+        username: username,
+        wallet_address: { $ne: wallet }
+      });
+      if (existingUser) return res.status(409).json({ error: "Username già in uso" });
+      update.username = username;
+    }
+
+    // Controllo unicità email solo se modificata
+    if (email && email !== user.email) {
+      const existingEmail = await db.collection("users").findOne({
+        email: email,
+        wallet_address: { $ne: wallet }
+      });
+      if (existingEmail) return res.status(409).json({ error: "Email già in uso" });
+      update.email = email;
+    }
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ error: "Nessun dato da aggiornare" });
+    }
+
+    const result = await db.collection("users").findOneAndUpdate(
+      { wallet_address: wallet },
+      { $set: update },
+      { returnDocument: "after" }
+    );
+
+    res.json({ success: true, user: result.value });
+
+  } catch (err) {
+    console.error("Errore in updateUser:", err);
+    res.status(500).json({ error: "Errore interno server: " + err.message });
+  }
+});
+
 /* ------------------- STATIC FILES ------------------- */
 app.use(express.static(path.join(__dirname, 'public')));
 
