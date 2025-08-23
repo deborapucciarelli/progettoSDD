@@ -1,6 +1,2 @@
-"tx_hash";"username";"wallet_address";"ISBN";"Book-Title";"DataCreazione";"amount";"currency";"status";"timestamp"
-"0xabc111";"alice";"0xAbC1234567890DefABC1234567890defABC12345";"0195153448";"Classical Mythology";"2018-10-26";"25.50";"ETH";"completed";"2025-08-20T14:35:12Z"
-"0xabc222";"carol";"0xCde3456789012Fabc3456789012fABC345678901";"0060973129";"Decision in Normandy";"2018-08-16";"0.01";"ETH";"failed";"2025-08-20T15:01:48Z"
-"0xabc333";"dave";"0xDef4567890123Abc4567890123aBC45678901234";"0393045218";"The Mummies of Urumchi";"2016-04-10";"40.00";"USD";"completed";"2025-08-19T11:20:05Z"
-"0xabc444";"bob";"0xBcd2345678901EfABC2345678901efABC234567";"0002005018";"Clara Callan";"2016-01-11";"18.75";"EUR";"failed";"2025-08-18T19:44:37Z"
-"0xabc555";"frank";"0xFgh6789012345Cde6789012345cDE67890123456";"0399135782";"The Kitchen God's Wife";"2019-12-03";"0.015";"ETH";"completed";"2025-08-20T09:22:10Z"
+"tx_hash";"buyer_wallet_address";"seller_wallet_address";"username";"wallet_address";"ISBN";"Book-Title";"DataCreazione";"amount";"currency";"status";"timestamp"
+"0xesempio";"0xDC42098bB91898eC2f419857C916cC78C23301dA";"0xAB1234567890ABCDEF1234567890ABCDEF123456";"alice0";"0xDC42098bB91898eC2f419857C916cC78C23301dA";"0123456788";"libro";"2018-10-26";"25.50";"ETH";"completed";"2025-08-20T14:35:12Z"
