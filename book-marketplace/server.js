@@ -251,6 +251,27 @@ app.post('/api/addBook', async (req, res) => {
   }
 });
 
+// Cancella utente + libri
+app.delete('/api/deleteUser', async (req, res) => {
+  try {
+    const { wallet } = req.body;
+    if(!wallet) return res.status(400).json({ error: "Wallet mancante" });
+
+    // Cancella tutti i libri dell'utente
+    await db.collection("book").deleteMany({ "User.wallet_address": wallet });
+
+    // Cancella l'utente
+    const result = await db.collection("users").deleteOne({ wallet_address: wallet });
+
+    if(result.deletedCount === 0) return res.status(404).json({ error: "Utente non trovato" });
+
+    res.json({ success: true });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: "Errore nella cancellazione profilo" });
+  }
+});
+
 /* ------------------- STATIC FILES ------------------- */
 app.use(express.static(path.join(__dirname, 'public')));
 

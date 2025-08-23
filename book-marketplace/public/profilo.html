@@ -8,11 +8,17 @@
 </head>
 <body>
 
+  <!-- Navbar -->
   <div id="navbar"></div>
   <script src="/js/loadNavbar.js"></script>
 
+  <!-- Container Profilo -->
   <div class="profile-container">
-    <h1>Profilo utente</h1>
+    <h1>
+      Profilo utente
+      <button id="deleteProfileBtn" title="Elimina profilo" style="background:none;border:none;cursor:pointer;font-size:20px;color:#f44336;">🗑️</button>
+    </h1>
+
     <div id="profileData">Caricamento dati...</div>
 
     <div id="userBooks">
@@ -152,9 +158,45 @@
       const addBtn = document.getElementById("addBookBtn");
       if(isOwner) {
         addBtn.onclick = () => window.location.href = "/aggiungiLibro.html";
-        addBtn.style.display = "inline-block"; // assicurati sia visibile
+        addBtn.style.display = "inline-block";
       } else {
         addBtn.style.display = "none";
+      }
+
+      // --- Pulsante cancella profilo ---
+      const deleteBtn = document.getElementById("deleteProfileBtn");
+      if(isOwner) {
+        deleteBtn.style.display = "inline-block";
+        deleteBtn.onclick = async () => {
+          const confirmDelete = confirm("ATTENZIONE! Cancellando il profilo, verranno eliminati anche tutti i libri associati. Sei sicuro?");
+          if(!confirmDelete) return;
+
+          try {
+            const res = await fetch("/api/deleteUser", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ wallet: currentWallet })
+            });
+
+            const data = await res.json();
+            if(res.ok) {
+              alert("Profilo e libri eliminati con successo!");
+
+              // Pulisci il wallet dal localStorage
+              localStorage.removeItem("walletAddress");
+
+              // Torna alla pagina di login/base
+              window.location.href = "/index.html"; // o home.html, a seconda della tua home
+            } else {
+              alert("Errore nella cancellazione: " + data.error);
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Errore nella cancellazione");
+          }
+        };
+      } else {
+        deleteBtn.style.display = "none";
       }
     }
 
