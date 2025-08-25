@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestione Profilo</title>
+  <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+  <div class="login-container">
+    <h1 id="loginTitle">Benvenuto</h1>
+    <div id="walletButtons"></div>
+    <div class="home-button-container">
+      <button onclick="window.location.href='/'">Torna al Login</button>
+      <button onclick="window.location.href='/home.html'">Vai alla Home</button>
+    </div>
+  </div>
+
+  <script>
+    let walletAddress = localStorage.getItem("walletAddress") || "";
+
+    async function getUsername(wallet) {
+      try {
+        const response = await fetch(`/api/getUsername?wallet=${wallet}`);
+        if (!response.ok) throw new Error("Utente non trovato");
+        const data = await response.json();
+        return data.username;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    async function renderProfile() {
+      const title = document.getElementById("loginTitle");
+      const container = document.getElementById("walletButtons");
+      container.innerHTML = "";
+
+      if (!walletAddress) {
+        window.location.href = "/";
+        return;
+      }
+
+      const username = await getUsername(walletAddress);
+      title.textContent = username ? `Ciao, ${username}` : "Benvenuto";
+
+      // pulsante profilo
+      const profileBtn = document.createElement("button");
+      profileBtn.textContent = "Dettagli profilo utente";
+      profileBtn.onclick = () => {
+        if (username) {
+          window.location.href = `/utente/${username}?wallet=${walletAddress}`;
+        }
+      };
+
+      // pulsante logout
+      const logoutBtn = document.createElement("button");
+      logoutBtn.textContent = "Log out";
+      logoutBtn.onclick = () => {
+        localStorage.removeItem("walletAddress");
+        walletAddress = "";
+        window.location.href = "/";
+      };
+
+      container.appendChild(profileBtn);
+      container.appendChild(logoutBtn);
+    }
+
+    renderProfile();
+  </script>
+</body>
+</html>

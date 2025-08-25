@@ -7,109 +7,39 @@
 </head>
 <body>
   <div class="login-container">
-    <h1 id="loginTitle">Accedi con Metamask</h1>
-    
-    <!-- Contenitore bottoni wallet -->
-    <div id="walletButtons"></div>
-    
-    <!-- Contenitore pulsante Ritorna alla Home -->
-    <div class="home-button-container" id="homeBtnContainer" style="display:none;">
-      <button id="homeBtn">Ritorna alla Home</button>
-    </div>
+    <h1>Accedi con Metamask</h1>
+    <button id="connectBtn">Connetti Wallet</button>
   </div>
 
   <script>
-    const homeBtn = document.getElementById("homeBtn");
-    const homeBtnContainer = document.getElementById("homeBtnContainer");
+    const connectBtn = document.getElementById("connectBtn");
 
-    homeBtn.onclick = () => {
-      window.location.href = "/home.html";
-    };
+    connectBtn.onclick = async () => {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          const walletAddress = accounts[0];
 
-    let walletAddress = localStorage.getItem("walletAddress") || "";
+          // creo utente su MongoDB se non esiste
+          await fetch("/api/loginOrRegister", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ wallet: walletAddress })
+          });
 
-    async function getUsername(wallet) {
-      try {
-        const response = await fetch(`/api/getUsername?wallet=${wallet}`);
-        if (!response.ok) throw new Error('Utente non trovato');
-        const data = await response.json();
-        return data.username;
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    }
+          // salvo nel localStorage
+          localStorage.setItem("walletAddress", walletAddress);
 
-    async function renderButtons() {
-      const container = document.getElementById("walletButtons");
-      const title = document.getElementById("loginTitle");
-      container.innerHTML = "";
-
-      if (walletAddress) {
-        homeBtnContainer.style.display = "block";
-
-        const username = await getUsername(walletAddress);
-        title.textContent = username ? `Ciao, ${username}` : "Benvenuto";
-
-        // Bottone "Il mio profilo"
-        const profileBtn = document.createElement("button");
-        profileBtn.textContent = "Dettagli profilo utente";
-        profileBtn.onclick = () => {
-          if (username) {
-            window.location.href = `/utente/${username}?wallet=${walletAddress}`;
-          }
-        };
-
-        // Bottone logout
-        const logoutBtn = document.createElement("button");
-        logoutBtn.textContent = "Log out";
-        logoutBtn.onclick = () => {
-          localStorage.removeItem("walletAddress");
-          walletAddress = "";
-          title.textContent = "Accedi con Metamask";
-          homeBtnContainer.style.display = "none";
-          renderButtons();
-        };
-
-        container.appendChild(profileBtn);
-        container.appendChild(logoutBtn);
+          // reindirizzo a gestioneProfilo
+          window.location.href = "/gestioneProfilo.html";
+        } catch (err) {
+          console.error(err);
+          alert("Connessione wallet fallita");
+        }
       } else {
-        homeBtnContainer.style.display = "none";
-        title.textContent = "Accedi con Metamask";
-
-        const connectBtn = document.createElement("button");
-        connectBtn.textContent = "Connetti Wallet";
-        connectBtn.onclick = async () => {
-          if (window.ethereum) {
-            try {
-              const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-              walletAddress = accounts[0];
-
-              // --- Creo utente su MongoDB se non esiste ---
-              await fetch("/api/loginOrRegister", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ wallet: walletAddress })
-});
-
-
-              localStorage.setItem("walletAddress", walletAddress);
-              renderButtons();
-              window.location.href = "/home.html";
-            } catch (err) {
-              console.error(err);
-              alert("Connessione wallet fallita");
-            }
-          } else {
-            alert("Installa Metamask in Firefox o Chrome!");
-          }
-        };
-
-        container.appendChild(connectBtn);
+        alert("Installa Metamask in Firefox o Chrome!");
       }
-    }
-
-    renderButtons();
+    };
   </script>
 </body>
 </html>
