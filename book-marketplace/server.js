@@ -53,12 +53,22 @@ app.get('/api/books/:id', async (req, res) => {
     const bookId = req.params.id;
     const book = await db.collection("book").findOne({ _id: bookId });
     if (!book) return res.status(404).json({ error: 'Libro non trovato' });
+
+    // se esiste un wallet dentro il libro → recupero utente
+    if (book.User?.wallet_address) {
+      const user = await db.collection("users").findOne({ wallet_address: book.User.wallet_address });
+      if (user) {
+        book.User.username = user.username; // aggiorno col vero username
+      }
+    }
+
     res.json(book);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Errore nel recupero del libro' });
   }
 });
+
 
 // Recupera username da wallet
 app.get('/api/getUsername', async (req, res) => {
