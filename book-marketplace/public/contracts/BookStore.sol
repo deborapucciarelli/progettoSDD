@@ -1,73 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
-contract BookStore is ReentrancyGuard {
+contract BookStore {
     struct Book {
-        string id;          // ISBN_username_dataCreazione
-        address seller;     // chi ha listato
-        address buyer;      // compratore (dopo l’acquisto)
-        uint256 price;      // prezzo in wei
+        string isbn;
+        address owner; // wallet address del venditore
+        uint256 price; // prezzo in wei
         bool sold;
-        bool exists;
     }
 
-    mapping(string => Book) private books;
-    mapping(address => uint256) public proceeds; // saldo ritirabile dal venditore
+    mapping(string => Book) public books; // chiave: isbn + username + DataCreazione
 
-    event BookListed(string indexed bookId, address indexed seller, uint256 price);
-    event BookBought(string indexed bookId, address indexed seller, address indexed buyer, uint256 amount);
-    event ProceedsWithdrawn(address indexed seller, uint256 amount);
+    event BookBought(string bookId, address buyer, uint256 amount);
 
-    /// Aggiunge un libro in vendita
-    function listBook(string calldata bookId, uint256 price) external {
-        require(bytes(bookId).length > 0, "bookId vuoto");
-        require(price > 0, "prezzo deve essere > 0");
-        Book storage b = books[bookId];
-        require(!b.exists, "book gia' listato");
+    // Compra un libro
+    function buyBook(string memory bookId) public payable {
+        Book storage book = books[bookId];
 
-        books[bookId] = Book({
-            id: bookId,
-            seller: msg.sender,
-            buyer: address(0),
-            price: price,
-            sold: false,
-            exists: true
-        });
+        require(!book.sold, "Libro gia' venduto");
+        require(msg.value >= book.price, "Ether insufficiente");
+        require(book.owner != msg.sender, "Non puoi comprare il tuo libro");
+        require(book.owner != address(0), "Libro non registrato");
 
-        emit BookListed(bookId, msg.sender, price);
-    }
+        address payable seller = payable(book.owner);
 
-    /// Acquista un libro già listato
-    function buyBook(string calldata bookId) external payable nonReentrant {
-        Book storage b = books[bookId];
-        require(b.exists, "book non esiste");
-        require(!b.sold, "gia' venduto");
-        require(msg.value == b.price, "prezzo errato");
+        // segna come venduto
+        book.sold = true;
+        book.owner = msg.sender; // ora il nuovo owner è l'acquirente
 
-        b.buyer = msg.sender;
-        b.sold = true;
+        // paga il venditore
+        (bool success, ) = seller.call{value: book.price}("");
+        require(success, "Pagamento al venditore fallito");
 
-        proceeds[b.seller] += msg.value;
+        // rimborsa eventuale eccedenza
+        if (msg.value > book.price) {
+            (bool refundSuccess, ) = msg.sender.call{value: msg.value - book.price}("");
+            require(refundSuccess, "Rimborso fallito");
+        }
 
-        emit BookBought(bookId, b.seller, msg.sender, msg.value);
-    }
-
-    /// Il venditore ritira i fondi accumulati
-    function withdrawProceeds() external nonReentrant {
-        uint256 amount = proceeds[msg.sender];
-        require(amount > 0, "nessun saldo");
-        proceeds[msg.sender] = 0;
-
-        (bool ok, ) = payable(msg.sender).call{value: amount}("");
-        require(ok, "withdraw fallito");
-
-        emit ProceedsWithdrawn(msg.sender, amount);
-    }
-
-    /// Getter per la UI
-    function getBook(string calldata bookId) external view returns (Book memory) {
-        return books[bookId];
+        emit BookBought(bookId, msg.sender, book.price);
     }
 }

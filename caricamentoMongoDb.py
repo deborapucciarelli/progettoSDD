@@ -89,7 +89,7 @@ for _, row in books_df.iterrows():
         "Image-URL-S": str(row["Image-URL-S"]),
         "Usato": str(row["usato"]).lower() == "true",
         "DataCreazione": data_creazione,
-        "Prezzo": float(row.get("Prezzo", 0)),  # <-- aggiunto il prezzo
+        "Prezzo": str(row["Prezzo"]),
         "User": user_info,
     }
     books_documents.append(doc)

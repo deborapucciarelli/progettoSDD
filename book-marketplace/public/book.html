@@ -5,7 +5,7 @@
   <title>Dettaglio Libro</title>
   <link rel="stylesheet" href="/css/book.css">
   <link rel="stylesheet" href="/css/navbar.css">
-  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 
   <style>
     /* Pulsante trash a lato del titolo */
@@ -63,7 +63,7 @@
     const bookId = window.location.pathname.split('/').pop();
 
     // Contratto Ethereum
-    const contractAddress = "0xf8e81D47203A594245E36C48e151709F0C19fBe8"; // metti qui l'indirizzo del tuo PaymentManagerV2
+    const contractAddress = "0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B";
     const contractABI = [
 	{
 		"anonymous": false,
@@ -176,6 +176,8 @@
           return;
         }
         const book = await res.json();
+        console.log("Book caricato:", book);
+        console.log("Prezzo:", book['Prezzo'], typeof book['Prezzo']);
 
         const bookWallet = (book.User?.wallet_address || "").toLowerCase();
         const isOwner = currentWallet && bookWallet && currentWallet === bookWallet;
