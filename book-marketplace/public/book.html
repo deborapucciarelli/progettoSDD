@@ -8,63 +8,58 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 
   <style>
-    /* Pulsante trash a lato del titolo */
-    #deleteBtn {
-      display: inline-block;
-      margin-left: 10px;
-      cursor: pointer;
-      font-size: 22px;
-      color: #fff8dc; /* colore chiaro, uniforme al titolo */
-      transition: transform 0.2s ease, color 0.2s ease;
-    }
-
-    #deleteBtn:hover {
-      color: #ff5555; /* leggero rosso al passaggio del mouse */
-      transform: scale(1.2);
-    }
+    /* Pulsante trash */
+    #deleteBtn { display:inline-block; margin-left:10px; cursor:pointer; font-size:22px; color:#fff8dc; transition: transform 0.2s ease, color 0.2s ease; }
+    #deleteBtn:hover { color:#ff5555; transform:scale(1.2); }
 
     /* Bottone acquista */
-    #buyBtn {
-      margin-top: 20px;
-      padding: 12px 24px;
-      background: linear-gradient(135deg, #ff7e5f, #feb47b);
-      border: none;
-      border-radius: 12px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    }
+    #buyBtn, #addBookBtn { margin-top:20px; padding:12px 24px; background: linear-gradient(135deg, #ff7e5f, #feb47b); border:none; border-radius:12px; color:#fff; font-size:16px; font-weight:bold; cursor:pointer; transition: 0.3s; box-shadow:0 6px 15px rgba(0,0,0,0.4); }
+    #buyBtn:hover, #addBookBtn:hover { background: linear-gradient(135deg,#feb47b,#ff7e5f); transform:translateY(-3px); box-shadow:0 10px 20px rgba(0,0,0,0.5); }
 
-    #buyBtn:hover {
-      background: linear-gradient(135deg, #feb47b, #ff7e5f);
-      transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-    }
+    /* Form aggiunta libro */
+    #addBookForm { margin-top:20px; display:flex; flex-direction:column; gap:10px; max-width:400px; }
+    #addBookForm input { padding:8px; font-size:14px; }
   </style>
 </head>
 <body>
 
-  <div id="navbar"></div>
-  <script src="/js/loadNavbar.js"></script>
+<div id="navbar"></div>
+<script src="/js/loadNavbar.js"></script>
 
-  <div class="home-container">
-    <h1>Dettaglio Libro</h1>
-  </div>
+<div class="home-container">
+  <h1>Dettaglio Libro</h1>
+</div>
 
-  <div class="books-section" id="bookContainer">
-    <!-- Dettagli libro verranno inseriti qui -->
-  </div>
+<div class="books-section" id="bookContainer"></div>
 
-  <script>
-    const currentWallet = (localStorage.getItem("walletAddress") || "").toLowerCase();
-    const bookId = window.location.pathname.split('/').pop();
-
-    // Contratto Ethereum
-    const contractAddress = "0xD7ACd2a9FD159E69Bb102A1ca21C9a3e3A5F771B";
-    const contractABI = [
+<script>
+const contractAddress = "0x358AA13c52544ECCEF6B0ADD0f801012ADAD5eE3";
+const contractABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "BookAdded",
+		"type": "event"
+	},
 	{
 		"anonymous": false,
 		"inputs": [
@@ -91,6 +86,73 @@
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "BookRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "msg",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Debug",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "isbn",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addBook",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -99,6 +161,53 @@
 			}
 		],
 		"name": "books",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "isbn",
+				"type": "string"
+			},
+			{
+				"internalType": "address payable",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "sold",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "buyBook",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "getBook",
 		"outputs": [
 			{
 				"internalType": "string",
@@ -132,122 +241,133 @@
 				"type": "string"
 			}
 		],
-		"name": "buyBook",
+		"name": "isBookAvailable",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "removeBook",
 		"outputs": [],
-		"stateMutability": "payable",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ];
 
-    // Funzione per connettere MetaMask
-    async function connectWallet() {
-      if (!window.ethereum) {
-        alert("Installa MetaMask!");
-        return null;
-      }
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const account = await signer.getAddress();
-      return { provider, signer, account };
-    }
+let currentWallet = localStorage.getItem("walletAddress") || "";
 
-    // Funzione per acquistare libro sul contratto
-    async function buyBookOnChain(signer, bookId, priceInEther) {
+async function connectWallet() {
+  if (!window.ethereum) { alert("Installa MetaMask!"); return null; }
+  await window.ethereum.request({ method: "eth_requestAccounts" });
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const account = await signer.getAddress();
+  currentWallet = account;
+  localStorage.setItem("walletAddress", currentWallet);
+  return { signer, account };
+}
+
+async function buyBookOnChain(bookId, priceEth) {
+  const { signer } = await connectWallet();
+  if (!signer) return;
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
   try {
-    const tx = await contract.buyBook(bookId, {
-      value: ethers.parseEther(priceInEther) // inviamo il prezzo in ETH
-    });
+    const tx = await contract.buyBook(bookId, { value: ethers.parseEther(priceEth) });
     await tx.wait();
-    alert("Acquisto completato su blockchain!");
+    alert("Acquisto completato!");
   } catch(err) {
     console.error(err);
-    alert("Errore durante l'acquisto: " + (err.message || err));
+    alert("Errore durante l'acquisto: "+(err.message||err));
   }
 }
 
+async function addBookOnChain(book) {
+  const { signer, account } = await connectWallet();
+  if (!signer) return;
 
-    async function loadBook() {
-      try {
-        const res = await fetch(`/api/books/${bookId}`);
-        if (!res.ok) {
-          document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>';
-          return;
-        }
-        const book = await res.json();
-        console.log("Book caricato:", book);
-        console.log("Prezzo:", book['Prezzo'], typeof book['Prezzo']);
+  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+  const priceWei = ethers.parseEther(String(book.Prezzo));
 
-        const bookWallet = (book.User?.wallet_address || "").toLowerCase();
-        const isOwner = currentWallet && bookWallet && currentWallet === bookWallet;
+  try {
+    // aggiungi libro su blockchain
+    const tx = await contract.addBook(book._id, book.ISBN, priceWei);
+    await tx.wait();
 
-        const container = document.getElementById('bookContainer');
-        container.innerHTML = `
-          <div class="book-container">
-            <div class="book-image">
-              <img src="${book['Image-URL-S']}" alt="${book['Book-Title']}">
-            </div>
-            <div class="book-details">
-              <h2>
-                ${book['Book-Title']}
-                ${isOwner ? '<span id="deleteBtn" title="Elimina libro">🗑️</span>' : ''}
-              </h2>
-              <p><strong>Autore:</strong> ${book['Book-Author']}</p>
-              <p><strong>Anno:</strong> ${book['Year-Of-Publication']}</p>
-              <p><strong>Usato:</strong> ${book.Usato ? 'Sì' : 'No'}</p>
-              <p><strong>Prezzo:</strong> ${book['Prezzo']}</p>
-              <p><strong>Utente:</strong> ${book.User?.username || 'N/A'}</p>
+    // salva solo metadati su Mongo
+    await fetch('/api/addBook', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(book)
+    });
 
-              <button id="buyBtn">Acquista</button>
-            </div>
-          </div>
-        `;
-
-        // Bottone acquista
-        document.getElementById("buyBtn").onclick = async () => {
-       if (!bookWallet) {
-          alert("Indirizzo del venditore non disponibile.");
-      return;
-      }
-      const { signer } = await connectWallet();
-    if (!signer) return;
-      // book['Prezzo'] deve essere una stringa in ETH
-    await buyBookOnChain(signer, bookId, book['Prezzo']);
-    };
-
-
-        // Bottone elimina (solo se owner)
-        if (isOwner) {
-          document.getElementById("deleteBtn").onclick = async () => {
-            if (!confirm("Sei sicuro di voler eliminare questo libro?")) return;
-            try {
-              const resDel = await fetch('/api/deleteBook', {
-                method: 'DELETE',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ _id: book._id })
-              });
-              const data = await resDel.json();
-              if (resDel.ok) {
-                alert("Libro eliminato con successo!");
-                window.location.href = '/utente/' + currentWallet + '?wallet=' + currentWallet;
-              } else {
-                alert("Errore: " + data.error);
-              }
-            } catch(err) {
-              console.error("Errore deleteBook:", err);
-              alert("Errore nella cancellazione del libro.");
-            }
-          };
-        }
-
-      } catch (err) {
-        console.error("Errore loadBook:", err);
-        document.getElementById('bookContainer').innerHTML = '<p>Errore caricamento libro.</p>';
-      }
-    }
-
+    alert("Libro aggiunto!");
     loadBook();
-  </script>
+  } catch(err) {
+    console.error(err);
+    alert("Errore aggiunta libro: "+(err.message||err));
+  }
+}
+
+async function loadBook() {
+  const bookId = window.location.pathname.split('/').pop();
+  const res = await fetch(`/api/books/${bookId}`);
+  if (!res.ok) { document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>'; return; }
+  const book = await res.json();
+
+  const bookWallet = (book.User?.wallet_address || "");
+  const isOwner = currentWallet && bookWallet && currentWallet === bookWallet;
+
+  const container = document.getElementById('bookContainer');
+  container.innerHTML = `
+    <div class="book-container">
+      <div class="book-image"><img src="${book['Image-URL-S']}" alt="${book['Book-Title']}"></div>
+      <div class="book-details">
+        <h2>${book['Book-Title']} ${isOwner ? '<span id="deleteBtn" title="Elimina libro">🗑️</span>' : ''}</h2>
+        <p><strong>Autore:</strong> ${book['Book-Author']}</p>
+        <p><strong>Anno:</strong> ${book['Year-Of-Publication']}</p>
+        <p><strong>Usato:</strong> ${book.Usato ? 'Sì' : 'No'}</p>
+        <p><strong>Prezzo:</strong> ${book['Prezzo']} ETH</p>
+        <p><strong>Utente:</strong> ${book.User?.username || 'N/A'}</p>
+        ${!isOwner ? '<button id="buyBtn">Acquista</button>' : ''}
+      </div>
+    </div>
+  `;
+
+  if (!isOwner) {
+    document.getElementById("buyBtn").onclick = async () => await buyBookOnChain(book._id, book['Prezzo']);
+  }
+
+  if (isOwner) {
+    document.getElementById("deleteBtn").onclick = async () => {
+      if (!confirm("Sei sicuro di voler eliminare questo libro?")) return;
+      try {
+        const resDel = await fetch('/api/deleteBook', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'wallet-address': currentWallet },
+        body: JSON.stringify({ _id: book._id })
+        });
+        const data = await resDel.json();
+        if (resDel.ok) { alert("Libro eliminato!"); window.location.href='/'; }
+        else alert("Errore: "+data.error);
+      } catch(err) { console.error(err); alert("Errore cancellazione libro"); }
+    };
+  }
+}
+
+loadBook();
+</script>
 </body>
 </html>

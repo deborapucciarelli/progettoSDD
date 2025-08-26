@@ -86,7 +86,7 @@
       const container = document.getElementById("profileData");
       container.innerHTML = "";
 
-      const isOwner = currentWallet && (user.wallet_address.toLowerCase() === currentWallet.toLowerCase());
+      const isOwner = currentWallet && (user.wallet_address === currentWallet);
 
       function createEditableField(label, field, value) {
         const p = document.createElement("p");

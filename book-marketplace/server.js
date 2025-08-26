@@ -165,13 +165,14 @@ app.get('/api/getBooksByWallet', async (req, res) => {
   }
 });
 
-// Se non esiste l'utente lo crea
+
 app.post('/api/loginOrRegister', async (req, res) => {
   try {
     const { wallet } = req.body;
-    if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
+    console.log("Wallet ricevuto dal frontend:", wallet);
 
     let user = await db.collection("users").findOne({ wallet_address: wallet });
+    console.log("Utente trovato:", user);
 
     if (!user) {
       const newUser = {
@@ -180,7 +181,8 @@ app.post('/api/loginOrRegister', async (req, res) => {
         wallet_address: wallet
       };
       const result = await db.collection("users").insertOne(newUser);
-      user = { ...newUser, _id: result.insertedId }; // <-- così hai l'id
+      user = { ...newUser, _id: result.insertedId };
+      console.log("Nuovo utente creato:", user);
     }
 
     res.json(user);
@@ -293,8 +295,8 @@ app.delete('/api/deleteBook', async (req, res) => {
     if (!book) return res.status(404).json({ error: "Libro non trovato" });
 
     // Controllo proprietà: solo il proprietario può cancellare
-    const currentWallet = req.headers['wallet-address']?.toLowerCase() || null;
-    const bookWallet = book.User?.wallet_address?.toLowerCase() || (_id.split('_')[2] || '').toLowerCase();
+    const currentWallet = req.headers['wallet-address'] || null;
+    const bookWallet = book.User?.wallet_address || (_id.split('_')[2] || '');
     
     if (currentWallet && currentWallet !== bookWallet) {
       return res.status(403).json({ error: "Non sei autorizzato a cancellare questo libro" });

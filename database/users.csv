@@ -1,7 +1,6 @@
 "username";"email";"wallet_address"
-"alice0";"alice@example.com";"0xDC42098bB91898eC2f419857C916cC78C23301dA"
-"bob1";"bob@example.com";"0x0a578aCd9291A13440ec02F0dD0C67673003A9AC"
-"carol2";"carol@example.com";"0xC4CA1e4BCceb3BAaea373F1a2EE5eC2939c75EF2"
-"dave3";"dave@example.com";"0xCe45D2F5Bb68790cf811Deef2b62D45b45E3FaD4"
-"eve4";"eve@example.com";"0xe3FEf91d6daA4fd73ceE4a60132a5C25d8ED056d"
-
+"alice0";"alice@example.com";"0xdc42098bb91898ec2f419857c916cc78c23301da"
+"bob1";"bob@example.com";"0x0a578acd9291a13440ec02f0dd0c67673003a9ac"
+"carol2";"carol@example.com";"0xc4ca1e4bcceb3baaea373f1a2ee5ec2939c75ef2"
+"dave3";"dave@example.com";"0xce45d2f5bb68790cf811deef2b62d45b45e3fad4"
+"eve4";"eve@example.com";"0xe3fef91d6daa4fd73cee4a60132a5c25d8ed056d"

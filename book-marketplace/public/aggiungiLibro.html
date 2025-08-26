@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="/css/aggiungiLibro.css">
   <title>Aggiungi Libro</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
 </head>
 <body>
   <h1>Aggiungi un nuovo libro</h1>
@@ -24,22 +25,267 @@
   </form>
 
   <script>
-    const wallet = localStorage.getItem("walletAddress");
+    const contractAddress = "0x358AA13c52544ECCEF6B0ADD0f801012ADAD5eE3";
+    const contractABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "BookAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "BookBought",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "BookRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "msg",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "Debug",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "isbn",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addBook",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "books",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "isbn",
+				"type": "string"
+			},
+			{
+				"internalType": "address payable",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "sold",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "buyBook",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "getBook",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "isbn",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "sold",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "isBookAvailable",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "removeBook",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+
+    async function connectWallet() {
+      if (!window.ethereum) { alert("Installa MetaMask!"); return null; }
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const account = await signer.getAddress();
+      localStorage.setItem("walletAddress", account);
+      return { signer, account };
+    }
 
     function getCurrentDateTimeString() {
       const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+      const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+      const h = String(now.getHours()).padStart(2,'0'), min = String(now.getMinutes()).padStart(2,'0'), s = String(now.getSeconds()).padStart(2,'0');
+      return `${y}-${m}-${d}_${h}-${min}-${s}`;
     }
 
     document.getElementById("addBookForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
+
+      const wallet = localStorage.getItem("walletAddress");
+      if (!wallet) { alert("Devi connettere il wallet!"); return; }
+
+      // Recupera dati utente da Mongo
+      const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
+      const user = await resUser.json();
 
       const book = {
         ISBN: form.ISBN.value.trim(),
@@ -50,27 +296,34 @@
         "Image-URL-S": form["Image-URL-S"].value.trim(),
         Usato: form.Usato.checked,
         DataCreazione: getCurrentDateTimeString(),
-        User: { wallet_address: wallet }
+        Prezzo: form.PriceETH.value.trim(),
+        User: { wallet_address: wallet, username: user.username }
       };
-
-      // Recupera dati utente
-      const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
-      const user = await resUser.json();
       book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
 
-      // Aggiungi libro su MongoDB
-      const res = await fetch("/api/addBook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(book)
-      });
-      const data = await res.json();
+      try {
+        // 1️⃣ Aggiungi su blockchain
+        const { signer } = await connectWallet();
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
+        const priceWei = ethers.parseEther(book.Prezzo);
+        const tx = await contract.addBook(book._id, book.ISBN, priceWei);
+        await tx.wait();
 
-      if (res.ok) {
-        alert("Libro aggiunto su MongoDB!");
+        // 2️⃣ Aggiungi su MongoDB
+        const res = await fetch("/api/addBook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(book)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Errore MongoDB");
+
+        alert("Libro aggiunto su blockchain e MongoDB!");
         window.location.href = `/utente/${user.username}?wallet=${wallet}`;
-      } else {
-        alert("Errore: " + data.error);
+
+      } catch(err) {
+        console.error(err);
+        alert("Errore durante l'aggiunta del libro: " + (err.message || err));
       }
     });
   </script>
