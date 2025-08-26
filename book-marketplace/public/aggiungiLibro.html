@@ -17,6 +17,9 @@
     <label>Usato:
       <input type="checkbox" name="Usato">
     </label><br>
+    <label>Prezzo in ETH:
+      <input type="text" name="PriceETH" required>
+    </label><br>
     <button type="submit">Aggiungi libro</button>
   </form>
 
@@ -50,21 +53,21 @@
         User: { wallet_address: wallet }
       };
 
-      // Genera _id come ISBN + username + data e ora creazione
+      // Recupera dati utente
       const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
       const user = await resUser.json();
       book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
 
+      // Aggiungi libro su MongoDB
       const res = await fetch("/api/addBook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(book)
       });
-
       const data = await res.json();
-      if(res.ok) {
-        alert("Libro aggiunto con successo!");
-        // Redirect alla pagina profilo utente usando wallet
+
+      if (res.ok) {
+        alert("Libro aggiunto su MongoDB!");
         window.location.href = `/utente/${user.username}?wallet=${wallet}`;
       } else {
         alert("Errore: " + data.error);

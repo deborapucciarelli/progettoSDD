@@ -5,6 +5,8 @@
   <title>Dettaglio Libro</title>
   <link rel="stylesheet" href="/css/book.css">
   <link rel="stylesheet" href="/css/navbar.css">
+  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+
   <style>
     /* Pulsante trash a lato del titolo */
     #deleteBtn {
@@ -60,6 +62,112 @@
     const currentWallet = (localStorage.getItem("walletAddress") || "").toLowerCase();
     const bookId = window.location.pathname.split('/').pop();
 
+    // Contratto Ethereum
+    const contractAddress = "0xf8e81D47203A594245E36C48e151709F0C19fBe8"; // metti qui l'indirizzo del tuo PaymentManagerV2
+    const contractABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "BookBought",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "books",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "isbn",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "sold",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "bookId",
+				"type": "string"
+			}
+		],
+		"name": "buyBook",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	}
+];
+
+    // Funzione per connettere MetaMask
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("Installa MetaMask!");
+        return null;
+      }
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const account = await signer.getAddress();
+      return { provider, signer, account };
+    }
+
+    // Funzione per acquistare libro sul contratto
+    async function buyBookOnChain(signer, bookId, priceInEther) {
+  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+  try {
+    const tx = await contract.buyBook(bookId, {
+      value: ethers.parseEther(priceInEther) // inviamo il prezzo in ETH
+    });
+    await tx.wait();
+    alert("Acquisto completato su blockchain!");
+  } catch(err) {
+    console.error(err);
+    alert("Errore durante l'acquisto: " + (err.message || err));
+  }
+}
+
+
     async function loadBook() {
       try {
         const res = await fetch(`/api/books/${bookId}`);
@@ -86,16 +194,26 @@
               <p><strong>Autore:</strong> ${book['Book-Author']}</p>
               <p><strong>Anno:</strong> ${book['Year-Of-Publication']}</p>
               <p><strong>Usato:</strong> ${book.Usato ? 'Sì' : 'No'}</p>
+              <p><strong>Prezzo:</strong> ${book['Prezzo']}</p>
               <p><strong>Utente:</strong> ${book.User?.username || 'N/A'}</p>
+
               <button id="buyBtn">Acquista</button>
             </div>
           </div>
         `;
 
         // Bottone acquista
-        document.getElementById("buyBtn").onclick = () => {
-          alert(`Hai acquistato il libro con ID: ${book._id}`);
-        };
+        document.getElementById("buyBtn").onclick = async () => {
+       if (!bookWallet) {
+          alert("Indirizzo del venditore non disponibile.");
+      return;
+      }
+      const { signer } = await connectWallet();
+    if (!signer) return;
+      // book['Prezzo'] deve essere una stringa in ETH
+    await buyBookOnChain(signer, bookId, book['Prezzo']);
+    };
+
 
         // Bottone elimina (solo se owner)
         if (isOwner) {

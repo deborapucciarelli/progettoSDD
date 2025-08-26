@@ -72,13 +72,13 @@ def format_datetime(dt_str):
 books_documents = []
 for _, row in books_df.iterrows():
     user_info = user_map.get(row["UserID"], {"username": "N-A", "wallet_address": None})
-    
+   
     # Data creazione come datetime con ora precisa
     data_creazione = format_datetime(row.get("dataCreazione", ""))
-    
+   
     # Genera _id nello stesso formato della tua app
     _id = f"{row['ISBN']}_{user_info['username']}_{data_creazione}"
-    
+   
     doc = {
         "_id": _id,
         "ISBN": str(row["ISBN"]),
@@ -89,6 +89,7 @@ for _, row in books_df.iterrows():
         "Image-URL-S": str(row["Image-URL-S"]),
         "Usato": str(row["usato"]).lower() == "true",
         "DataCreazione": data_creazione,
+        "Prezzo": float(row.get("Prezzo", 0)),  # <-- aggiunto il prezzo
         "User": user_info,
     }
     books_documents.append(doc)

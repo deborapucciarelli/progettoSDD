@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 contract BookStore {
     struct Book {
         string isbn;
-        address owner; // wallet address come stringa
+        address owner; // wallet address
         uint256 price; // prezzo in wei
         bool sold;
     }
@@ -13,25 +13,21 @@ contract BookStore {
 
     event BookBought(string bookId, address buyer, uint256 amount);
 
-    // Aggiungi un libro al contratto (solo per test)
-    function addBook(string memory bookId, uint256 price) public {
-        books[bookId] = Book({
-            isbn: bookId,
-            owner: address(0),
-            price: price,
-            sold: false
-        });
-    }
-
     // Compra un libro
     function buyBook(string memory bookId) public payable {
         Book storage book = books[bookId];
         require(!book.sold, "Libro gia' venduto");
         require(msg.value >= book.price, "Ether insufficiente");
+        require(book.owner != msg.sender, "Non puoi comprare il tuo libro");
 
         book.owner = msg.sender;
         book.sold = true;
 
-        emit BookBought(bookId, msg.sender, msg.value);
+        // Rimborsa eventuale eccedenza
+        if(msg.value > book.price) {
+            payable(msg.sender).transfer(msg.value - book.price);
+        }
+
+        emit BookBought(bookId, msg.sender, book.price);
     }
 }

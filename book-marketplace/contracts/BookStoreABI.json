@@ -28,24 +28,6 @@
 		"inputs": [
 			{
 				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "addBook",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
 				"name": "",
 				"type": "string"
 			}
