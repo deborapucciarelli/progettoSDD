@@ -258,36 +258,44 @@
 		"type": "function"
 	}
 ];
+let signer, account, contract;
 
-    async function connectWallet() {
-      if (!window.ethereum) { alert("Installa MetaMask!"); return null; }
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const account = await signer.getAddress();
-      localStorage.setItem("walletAddress", account);
-      return { signer, account };
+  async function initBlockchain() {
+    if (!window.ethereum) { 
+        alert("Installa MetaMask!"); 
+        return;
     }
 
-    function getCurrentDateTimeString() {
-      const now = new Date();
-      const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
-      const h = String(now.getHours()).padStart(2,'0'), min = String(now.getMinutes()).padStart(2,'0'), s = String(now.getSeconds()).padStart(2,'0');
-      return `${y}-${m}-${d}_${h}-${min}-${s}`;
+    const wallet = localStorage.getItem("walletAddress");
+    if (!wallet) {
+        alert("Devi prima connettere il wallet da index.html!");
+        window.location.href = "/index.html";
+        return;
     }
 
-    document.getElementById("addBookForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = e.target;
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    account = await signer.getAddress();
 
-      const wallet = localStorage.getItem("walletAddress");
-      if (!wallet) { alert("Devi connettere il wallet!"); return; }
+    contract = new ethers.Contract(contractAddress, contractABI, signer);
+}
 
-      // Recupera dati utente da Mongo
-      const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
-      const user = await resUser.json();
+function getCurrentDateTimeString() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
+}
 
-      const book = {
+document.getElementById("addBookForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const wallet = localStorage.getItem("walletAddress");
+    if (!wallet) { alert("Wallet non trovato, torna al login!"); return; }
+
+    const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
+    const user = await resUser.json();
+
+    const book = {
         ISBN: form.ISBN.value.trim(),
         "Book-Title": form["Book-Title"].value.trim(),
         "Book-Author": form["Book-Author"].value.trim(),
@@ -298,22 +306,21 @@
         DataCreazione: getCurrentDateTimeString(),
         Prezzo: form.PriceETH.value.trim(),
         User: { wallet_address: wallet, username: user.username }
-      };
-      book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
+    };
+    book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
 
-      try {
-        // 1️⃣ Aggiungi su blockchain
-        const { signer } = await connectWallet();
-        const contract = new ethers.Contract(contractAddress, contractABI, signer);
+    // 🔹 Qui stampi l'ID esatto
+    console.log("ID libro generato:", book._id);
+
+    try {
         const priceWei = ethers.parseEther(book.Prezzo);
         const tx = await contract.addBook(book._id, book.ISBN, priceWei);
         await tx.wait();
 
-        // 2️⃣ Aggiungi su MongoDB
         const res = await fetch("/api/addBook", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(book)
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(book)
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Errore MongoDB");
@@ -321,11 +328,16 @@
         alert("Libro aggiunto su blockchain e MongoDB!");
         window.location.href = `/utente/${user.username}?wallet=${wallet}`;
 
-      } catch(err) {
+    } catch(err) {
         console.error(err);
         alert("Errore durante l'aggiunta del libro: " + (err.message || err));
-      }
-    });
-  </script>
+    }
+});
+
+// Inizializza provider/contract appena carica la pagina
+window.onload = initBlockchain;
+</script>
+
+   
 </body>
 </html>

@@ -70,7 +70,7 @@ body {
 }
 
 /* Bottone acquista */
-#buyBtn {
+#buyBtn, #addBookBtn {
   margin-top: 20px;
   padding: 12px 24px;
   background: linear-gradient(135deg, #ff7e5f, #feb47b);
@@ -81,13 +81,42 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
 }
 
-#buyBtn:hover {
+#buyBtn:hover, #addBookBtn:hover {
   background: linear-gradient(135deg, #feb47b, #ff7e5f);
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+/* Pulsante delete */
+#deleteBtn {
+  display: inline-block;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 22px;
+  color: #fff8dc;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+#deleteBtn:hover {
+  color: #ff5555;
+  transform: scale(1.2);
+}
+
+/* Form aggiunta libro */
+#addBookForm {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+#addBookForm input {
+  padding: 8px;
+  font-size: 14px;
 }
 
 /* Responsive */
@@ -99,18 +128,4 @@ body {
   .book-details h2 {
     font-size: 20px;
   }
-}
-
-#deleteBtn {
-  display: inline-block;
-  margin-left: 10px;
-  cursor: pointer;
-  font-size: 22px;
-  color: #fff8dc; /* colore chiaro, uniforme al titolo */
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-#deleteBtn:hover {
-  color: #ff5555; /* leggero rosso al passaggio del mouse */
-  transform: scale(1.2);
 }
