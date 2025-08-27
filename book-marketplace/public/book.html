@@ -18,69 +18,9 @@
 
 <div class="books-section" id="bookContainer"></div>
 
-<script>
-const contractAddress = "0x5da97b62d7915094756882fb902f959314b4fdd4";
-const contractABI = [  
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": false, "internalType": "string", "name": "bookId", "type": "string" },
-      { "indexed": false, "internalType": "address", "name": "owner", "type": "address" },
-      { "indexed": false, "internalType": "uint256", "name": "price", "type": "uint256" }
-    ],
-    "name": "BookAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": false, "internalType": "string", "name": "bookId", "type": "string" },
-      { "indexed": false, "internalType": "address", "name": "buyer", "type": "address" },
-      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
-    ],
-    "name": "BookBought",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": false, "internalType": "string", "name": "bookId", "type": "string" },
-      { "indexed": false, "internalType": "address", "name": "owner", "type": "address" }
-    ],
-    "name": "BookRemoved",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "bookId", "type": "string" },
-      { "internalType": "string", "name": "isbn", "type": "string" },
-      { "internalType": "uint256", "name": "price", "type": "uint256" }
-    ],
-    "name": "addBook",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [ { "internalType": "string", "name": "bookId", "type": "string" } ],
-    "name": "buyBook",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [ { "internalType": "string", "name": "bookId", "type": "string" } ],
-    "name": "getBook",
-    "outputs": [
-      { "internalType": "string", "name": "isbn", "type": "string" },
-      { "internalType": "address", "name": "owner", "type": "address" },
-      { "internalType": "uint256", "name": "price", "type": "uint256" },
-      { "internalType": "bool", "name": "sold", "type": "bool" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
+<!-- Script principale come modulo -->
+<script type="module">
+import { contractAddress, contractABI } from '/js/contractData.js';
 
 let currentWallet = localStorage.getItem("walletAddress") || "";
 
@@ -100,14 +40,14 @@ async function connectWallet() {
 async function buyBookOnChain(bookId, priceEth) {
   const { signer } = await connectWallet();
   if (!signer) return;
+
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
   try {
-    // 1. Acquisto su blockchain
     const tx = await contract.buyBook(bookId, { value: ethers.parseEther(priceEth) });
     await tx.wait();
 
-    // 2. Rimuovo libro da MongoDB
+    // Aggiorno DB
     const res = await fetch('/api/buyBook', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -120,9 +60,8 @@ async function buyBookOnChain(bookId, priceEth) {
       return;
     }
 
-    // 3. Redirect alla homepage
     alert("Acquisto completato!");
-    window.location.href = "/home.html"; // o semplicemente "/" se preferisci
+    window.location.href = "/home.html";
 
   } catch(err) {
     console.error(err);
@@ -140,7 +79,7 @@ async function loadBook() {
   }
   const book = await res.json();
 
-  const bookWallet = (book.User?.wallet_address || "");
+  const bookWallet = book.User?.wallet_address || "";
   const isOwner = currentWallet && bookWallet && currentWallet === bookWallet;
 
   const container = document.getElementById('bookContainer');
@@ -182,5 +121,6 @@ async function loadBook() {
 
 loadBook();
 </script>
+
 </body>
 </html>

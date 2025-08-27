@@ -23,5 +23,6 @@ __pycache__/
 # Altro
 package.json
 package-lock.json
+book-marketplace/public/js/contractData.js
 
 

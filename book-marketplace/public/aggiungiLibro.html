@@ -24,242 +24,11 @@
     <button type="submit">Aggiungi libro</button>
   </form>
 
-  <script>
-    const contractAddress = "0x5da97b62d7915094756882fb902f959314b4fdd4";
-    const contractABI = [
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "BookAdded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "BookBought",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "BookRemoved",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "msg",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "addr",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "Debug",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "isbn",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "addBook",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "books",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "isbn",
-				"type": "string"
-			},
-			{
-				"internalType": "address payable",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "sold",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "buyBook",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "getBook",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "isbn",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "sold",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "isBookAvailable",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "removeBook",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
-];
+  <!-- Script principale come modulo -->
+  <script type="module">
+  import { contractAddress, contractABI } from '/js/contractData.js';
 
-let signer, account, contract;
+  let signer, account, contract;
 
   async function initBlockchain() {
     if (!window.ethereum) { 
@@ -279,66 +48,63 @@ let signer, account, contract;
     account = await signer.getAddress();
 
     contract = new ethers.Contract(contractAddress, contractABI, signer);
-}
+  }
 
-function getCurrentDateTimeString() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
-}
+  function getCurrentDateTimeString() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
+  }
 
-document.getElementById("addBookForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.target;
+  document.getElementById("addBookForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
 
-    const wallet = localStorage.getItem("walletAddress");
-    if (!wallet) { alert("Wallet non trovato, torna al login!"); return; }
+      const wallet = localStorage.getItem("walletAddress");
+      if (!wallet) { alert("Wallet non trovato, torna al login!"); return; }
 
-    const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
-    const user = await resUser.json();
+      const resUser = await fetch(`/api/getUserData?wallet=${wallet}`);
+      const user = await resUser.json();
 
-    const book = {
-        ISBN: form.ISBN.value.trim(),
-        "Book-Title": form["Book-Title"].value.trim(),
-        "Book-Author": form["Book-Author"].value.trim(),
-        "Year-Of-Publication": parseInt(form["Year-Of-Publication"].value),
-        Publisher: form.Publisher.value.trim(),
-        "Image-URL-S": form["Image-URL-S"].value.trim(),
-        Usato: form.Usato.checked,
-        DataCreazione: getCurrentDateTimeString(),
-        Prezzo: form.PriceETH.value.trim(),
-        User: { wallet_address: wallet, username: user.username }
-    };
-    book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
+      const book = {
+          ISBN: form.ISBN.value.trim(),
+          "Book-Title": form["Book-Title"].value.trim(),
+          "Book-Author": form["Book-Author"].value.trim(),
+          "Year-Of-Publication": parseInt(form["Year-Of-Publication"].value),
+          Publisher: form.Publisher.value.trim(),
+          "Image-URL-S": form["Image-URL-S"].value.trim(),
+          Usato: form.Usato.checked,
+          DataCreazione: getCurrentDateTimeString(),
+          Prezzo: form.PriceETH.value.trim(),
+          User: { wallet_address: wallet, username: user.username }
+      };
+      book._id = `${book.ISBN}_${user.username}_${book.DataCreazione}`;
 
-    // 🔹 Qui stampi l'ID esatto
-    console.log("ID libro generato:", book._id);
+      console.log("ID libro generato:", book._id);
 
-    try {
-        const priceWei = ethers.parseEther(book.Prezzo);
-        const tx = await contract.addBook(book._id, book.ISBN, priceWei);
-        await tx.wait();
+      try {
+          const priceWei = ethers.parseEther(book.Prezzo);
+          const tx = await contract.addBook(book._id, book.ISBN, priceWei);
+          await tx.wait();
 
-        const res = await fetch("/api/addBook", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(book)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Errore MongoDB");
+          const res = await fetch("/api/addBook", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(book)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Errore MongoDB");
 
-        alert("Libro aggiunto su blockchain e MongoDB!");
-        window.location.href = `/utente/${user.username}?wallet=${wallet}`;
+          alert("Libro aggiunto su blockchain e MongoDB!");
+          window.location.href = `/utente/${user.username}?wallet=${wallet}`;
 
-    } catch(err) {
-        console.error(err);
-        alert("Errore durante l'aggiunta del libro: " + (err.message || err));
-    }
-});
+      } catch(err) {
+          console.error(err);
+          alert("Errore durante l'aggiunta del libro: " + (err.message || err));
+      }
+  });
 
-// Inizializza provider/contract appena carica la pagina
-window.onload = initBlockchain;
-</script>
-
-   
+  // Inizializza provider/contract appena carica la pagina
+  window.onload = initBlockchain;
+  </script>
 </body>
 </html>
