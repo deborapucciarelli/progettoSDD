@@ -31,8 +31,23 @@
   </div>
 
   <script>
-    const currentWallet = localStorage.getItem("walletAddress");
+    let currentWallet = null;
     let currentEditing = null;
+
+    // 🔹 Recupera wallet dall'URL o dal localStorage
+    function getWallet() {
+      const params = new URLSearchParams(window.location.search);
+      let wallet = params.get("wallet");
+      if(!wallet) wallet = localStorage.getItem("walletAddress");
+      if(!wallet) {
+        alert("Utente non loggato!");
+        window.location.href = "/";
+      }
+      wallet = wallet?.toLowerCase();
+      currentWallet = wallet;
+      return wallet;
+
+    }
 
     // --- Fetch dati utente ---
     async function getUserData(wallet) {
@@ -85,8 +100,7 @@
     function renderUser(user) {
       const container = document.getElementById("profileData");
       container.innerHTML = "";
-
-      const isOwner = currentWallet && (user.wallet_address === currentWallet);
+      const isOwner = currentWallet && (user.wallet_address.toLowerCase() === currentWallet);
 
       function createEditableField(label, field, value) {
         const p = document.createElement("p");
@@ -181,12 +195,8 @@
             const data = await res.json();
             if(res.ok) {
               alert("Profilo e libri eliminati con successo!");
-
-              // Pulisci il wallet dal localStorage
               localStorage.removeItem("walletAddress");
-
-              // Torna alla pagina di login/base
-              window.location.href = "/index.html"; // o home.html, a seconda della tua home
+              window.location.href = "/index.html";
             } else {
               alert("Errore nella cancellazione: " + data.error);
             }
@@ -226,19 +236,15 @@
     }
 
     // --- Render pagina completa ---
-    async function renderProfile() {
-      const params = new URLSearchParams(window.location.search);
-      const wallet = params.get("wallet");
-      if(!wallet) return;
-
+    async function renderProfilePage() {
+      const wallet = getWallet();
       const user = await getUserData(wallet);
       if(!user) return;
-
       renderUser(user);
       await renderBooks(wallet);
     }
 
-    renderProfile();
+    renderProfilePage();
   </script>
 </body>
 </html>

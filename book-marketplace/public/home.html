@@ -38,18 +38,17 @@
       let walletAddress = localStorage.getItem("walletAddress");
 
       if (!walletAddress && window.ethereum) {
-        const accounts = await ethereum.request({ method: "eth_accounts" });
+        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
         if (accounts.length > 0) {
           walletAddress = accounts[0];
           localStorage.setItem("walletAddress", walletAddress);
         }
       }
 
-      document.getElementById("walletInfo").innerHTML = walletAddress 
-        ? `✅ Wallet connesso: ${walletAddress}` 
+      document.getElementById("walletInfo").innerHTML = walletAddress
+        ? `✅ Wallet connesso: ${walletAddress.toLowerCase()}` 
         : `❌ Nessun wallet connesso.<br> <a href='/index.html' style='color: #f6851b;'>Torna al login</a>`;
     }
-    loadWallet();
 
     // Caricamento libri
     async function loadBooks() {
@@ -69,6 +68,9 @@
         container.appendChild(card);
       });
     }
+
+    // Avvia wallet + libri
+    loadWallet();
     loadBooks();
   </script>
 </body>

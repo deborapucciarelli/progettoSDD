@@ -73,9 +73,13 @@ app.get('/api/books/:id', async (req, res) => {
 // Recupera username da wallet
 app.get('/api/getUsername', async (req, res) => {
   try {
-    const { wallet } = req.query;
+    let { wallet } = req.query;
     if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
 
+    // Trasformiamo l'indirizzo in lowercase
+    wallet = wallet.toLowerCase();
+
+    // Cerchiamo l'utente usando lowercase
     const user = await db.collection("users").findOne({ wallet_address: wallet });
     if (!user) return res.status(404).json({ error: 'Utente non trovato' });
 
@@ -85,6 +89,7 @@ app.get('/api/getUsername', async (req, res) => {
     res.status(500).json({ error: 'Errore nel recupero username' });
   }
 });
+
 
 // Recupera dati utente completi
 app.get('/api/getUserData', async (req, res) => {
@@ -169,10 +174,10 @@ app.get('/api/getBooksByWallet', async (req, res) => {
 app.post('/api/loginOrRegister', async (req, res) => {
   try {
     const { wallet } = req.body;
-    console.log("Wallet ricevuto dal frontend:", wallet);
+    //console.log("Wallet ricevuto dal frontend:", wallet);
 
     let user = await db.collection("users").findOne({ wallet_address: wallet });
-    console.log("Utente trovato:", user);
+    //console.log("Utente trovato:", user);
 
     if (!user) {
       const newUser = {
@@ -308,6 +313,27 @@ app.delete('/api/deleteBook', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Errore nella cancellazione del libro" });
+  }
+});
+
+// Elimina libro dopo acquisto
+app.delete('/api/buyBook', async (req, res) => {
+  try {
+    const { _id } = req.body;
+    if (!_id) return res.status(400).json({ error: "ID libro mancante" });
+
+    // Verifica che il libro esista
+    const book = await db.collection("book").findOne({ _id });
+    if (!book) return res.status(404).json({ error: "Libro non trovato" });
+
+    // Rimuovo libro dal DB
+    await db.collection("book").deleteOne({ _id });
+
+    res.json({ success: true, message: "Libro rimosso dopo acquisto" });
+
+  } catch (err) {
+    console.error("Errore in /api/buyBook:", err);
+    res.status(500).json({ error: "Errore interno server" });
   }
 });
 

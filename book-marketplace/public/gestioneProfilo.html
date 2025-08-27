@@ -16,32 +16,49 @@
   </div>
 
   <script>
-    let walletAddress = localStorage.getItem("walletAddress") || "";
+    // 🔹 Controlla wallet e renderizza username
+    async function checkWalletAndRenderUsername() {
+      let walletAddress = localStorage.getItem("walletAddress");
 
-    async function getUsername(wallet) {
-      try {
-        const response = await fetch(`/api/getUsername?wallet=${wallet}`);
-        if (!response.ok) throw new Error("Utente non trovato");
-        const data = await response.json();
-        return data.username;
-      } catch (err) {
-        console.error(err);
-        return null;
+      if (!walletAddress && window.ethereum) {
+        // prova a connettere il wallet
+        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+        if (accounts.length > 0) {
+          walletAddress = accounts[0];
+          localStorage.setItem("walletAddress", walletAddress);
+        }
       }
-    }
-
-    async function renderProfile() {
-      const title = document.getElementById("loginTitle");
-      const container = document.getElementById("walletButtons");
-      container.innerHTML = "";
 
       if (!walletAddress) {
         window.location.href = "/";
-        return;
+        return {};
       }
 
-      const username = await getUsername(walletAddress);
+      // fetch username associato al wallet
+      let username = null;
+      try {
+        const response = await fetch(`/api/getUsername?wallet=${walletAddress}`);
+        if (response.ok) {
+          const data = await response.json();
+          username = data.username || null;
+        }
+      } catch(err) {
+        console.error("Errore fetch username:", err);
+      }
+
+      const title = document.getElementById("loginTitle");
       title.textContent = username ? `Ciao, ${username}` : "Benvenuto";
+
+      return { walletAddress, username };
+    }
+
+    // 🔹 Render pulsanti gestione profilo
+    async function renderProfile() {
+      const container = document.getElementById("walletButtons");
+      container.innerHTML = "";
+
+      const { walletAddress, username } = await checkWalletAndRenderUsername();
+      if (!walletAddress) return;
 
       // pulsante profilo
       const profileBtn = document.createElement("button");
@@ -57,7 +74,6 @@
       logoutBtn.textContent = "Log out";
       logoutBtn.onclick = () => {
         localStorage.removeItem("walletAddress");
-        walletAddress = "";
         window.location.href = "/";
       };
 

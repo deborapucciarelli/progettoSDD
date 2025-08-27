@@ -6,8 +6,6 @@
   <link rel="stylesheet" href="/css/book.css">
   <link rel="stylesheet" href="/css/navbar.css">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
-
-  
 </head>
 <body>
 
@@ -21,242 +19,72 @@
 <div class="books-section" id="bookContainer"></div>
 
 <script>
-const contractAddress = "0x358AA13c52544ECCEF6B0ADD0f801012ADAD5eE3";
-const contractABI = [
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "BookAdded",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "buyer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "BookBought",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "BookRemoved",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "msg",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "addr",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "Debug",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "isbn",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "addBook",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "books",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "isbn",
-				"type": "string"
-			},
-			{
-				"internalType": "address payable",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "sold",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "buyBook",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "getBook",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "isbn",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "sold",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "isBookAvailable",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "bookId",
-				"type": "string"
-			}
-		],
-		"name": "removeBook",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
+const contractAddress = "0x5da97b62d7915094756882fb902f959314b4fdd4";
+const contractABI = [  
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "string", "name": "bookId", "type": "string" },
+      { "indexed": false, "internalType": "address", "name": "owner", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "price", "type": "uint256" }
+    ],
+    "name": "BookAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "string", "name": "bookId", "type": "string" },
+      { "indexed": false, "internalType": "address", "name": "buyer", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "BookBought",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "string", "name": "bookId", "type": "string" },
+      { "indexed": false, "internalType": "address", "name": "owner", "type": "address" }
+    ],
+    "name": "BookRemoved",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "bookId", "type": "string" },
+      { "internalType": "string", "name": "isbn", "type": "string" },
+      { "internalType": "uint256", "name": "price", "type": "uint256" }
+    ],
+    "name": "addBook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [ { "internalType": "string", "name": "bookId", "type": "string" } ],
+    "name": "buyBook",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [ { "internalType": "string", "name": "bookId", "type": "string" } ],
+    "name": "getBook",
+    "outputs": [
+      { "internalType": "string", "name": "isbn", "type": "string" },
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "uint256", "name": "price", "type": "uint256" },
+      { "internalType": "bool", "name": "sold", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
 ];
 
 let currentWallet = localStorage.getItem("walletAddress") || "";
 
+// 🔹 Connetti wallet
 async function connectWallet() {
   if (!window.ethereum) { alert("Installa MetaMask!"); return null; }
   await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -268,51 +96,48 @@ async function connectWallet() {
   return { signer, account };
 }
 
+// 🔹 Acquisto libro
 async function buyBookOnChain(bookId, priceEth) {
   const { signer } = await connectWallet();
   if (!signer) return;
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
   try {
+    // 1. Acquisto su blockchain
     const tx = await contract.buyBook(bookId, { value: ethers.parseEther(priceEth) });
     await tx.wait();
-    alert("Acquisto completato!");
-  } catch(err) {
-    console.error(err);
-    alert("Errore durante l'acquisto: "+(err.message||err));
-  }
-}
 
-async function addBookOnChain(book) {
-  const { signer, account } = await connectWallet();
-  if (!signer) return;
-
-  const contract = new ethers.Contract(contractAddress, contractABI, signer);
-  const priceWei = ethers.parseEther(String(book.Prezzo));
-
-  try {
-    // aggiungi libro su blockchain
-    const tx = await contract.addBook(book._id, book.ISBN, priceWei);
-    await tx.wait();
-
-    // salva solo metadati su Mongo
-    await fetch('/api/addBook', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(book)
+    // 2. Rimuovo libro da MongoDB
+    const res = await fetch('/api/buyBook', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _id: bookId })
     });
 
-    alert("Libro aggiunto!");
-    loadBook();
+    if (!res.ok) {
+      const err = await res.json();
+      alert("Acquisto registrato su blockchain ma errore DB: " + err.error);
+      return;
+    }
+
+    // 3. Redirect alla homepage
+    alert("Acquisto completato!");
+    window.location.href = "/home.html"; // o semplicemente "/" se preferisci
+
   } catch(err) {
     console.error(err);
-    alert("Errore aggiunta libro: "+(err.message||err));
+    alert("Errore durante l'acquisto: " + (err.message || err));
   }
 }
 
+// 🔹 Carica libro
 async function loadBook() {
   const bookId = window.location.pathname.split('/').pop();
   const res = await fetch(`/api/books/${bookId}`);
-  if (!res.ok) { document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>'; return; }
+  if (!res.ok) {
+    document.getElementById('bookContainer').innerHTML = '<p>Libro non trovato.</p>';
+    return;
+  }
   const book = await res.json();
 
   const bookWallet = (book.User?.wallet_address || "");
@@ -343,9 +168,9 @@ async function loadBook() {
       if (!confirm("Sei sicuro di voler eliminare questo libro?")) return;
       try {
         const resDel = await fetch('/api/deleteBook', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'wallet-address': currentWallet },
-        body: JSON.stringify({ _id: book._id })
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'wallet-address': currentWallet },
+          body: JSON.stringify({ _id: book._id })
         });
         const data = await resDel.json();
         if (resDel.ok) { alert("Libro eliminato!"); window.location.href='/'; }
