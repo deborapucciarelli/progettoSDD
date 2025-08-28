@@ -24,5 +24,6 @@ __pycache__/
 package.json
 package-lock.json
 book-marketplace/public/js/contractData.js
+book-marketplace/artifacts
 
 
