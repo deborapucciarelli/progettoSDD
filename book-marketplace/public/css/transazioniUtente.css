@@ -1,0 +1,87 @@
+body {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  color: #fff;
+}
+
+/* Titolo pagina */
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 28px;
+  color: #f6851b;
+  text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
+}
+
+/* Container principale transazioni */
+.tx-container {
+  max-width: 800px;
+  margin: auto;
+  overflow-y: auto;
+  height: 80vh;
+  padding: 15px;
+  border-radius: 15px;
+  background: rgba(0,0,0,0.5);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+/* Singola transazione */
+.tx-item {
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+/* Hover effetto */
+.tx-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+/* Buyer: blu/arancio */
+.buyer {
+  background: linear-gradient(135deg, rgba(0, 255, 255,0.3), rgba(0, 128, 255,0.3));
+  border-left: 5px solid #00ffff;
+}
+
+/* Seller: arancio/rosa */
+.seller {
+  background: linear-gradient(135deg, rgba(255, 165, 0,0.3), rgba(255, 85, 85,0.3));
+  border-left: 5px solid #ff9800;
+}
+
+/* Paragrafo transazione */
+.tx-item p {
+  margin: 6px 0;
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Strong evidenziato */
+.tx-item strong {
+  color: #ffd700;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .tx-container {
+    height: 70vh;
+    padding: 10px;
+  }
+
+  .tx-item p {
+    font-size: 14px;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+}

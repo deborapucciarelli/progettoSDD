@@ -11,20 +11,24 @@
   <!-- Navbar -->
   <div id="navbar"></div>
   <script src="/js/loadNavbar.js"></script>
+  <script src="/js/abbreviateWallet.js"></script>
 
   <!-- Container Profilo -->
   <div class="profile-container">
     <h1>
       Profilo utente
-      <button id="deleteProfileBtn" title="Elimina profilo" style="background:none;border:none;cursor:pointer;font-size:20px;color:#f44336;">🗑️</button>
+      <button id="deleteProfileBtn" style="display:none;" title="Elimina profilo"></button>
     </h1>
 
     <div id="profileData">Caricamento dati...</div>
 
+    <!-- Pulsante transazioni (solo proprietario) -->
+    <div id="transactionsContainer" style="text-align:center; margin: 20px 0;"></div>
+
     <div id="userBooks">
       <h2>
         Libri caricati
-        <button id="addBookBtn" title="Aggiungi nuovo libro">+</button>
+        <button id="addBookBtn" title="Aggiungi nuovo libro" style="display:none;">+</button>
       </h2>
       <div class="books-container" id="booksContainer">Caricamento libri...</div>
     </div>
@@ -34,19 +38,27 @@
     let currentWallet = null;
     let currentEditing = null;
 
-    // 🔹 Recupera wallet dall'URL o dal localStorage
-    function getWallet() {
+    // 🔹 Recupera wallet del profilo dall'URL
+    function getProfileWallet() {
       const params = new URLSearchParams(window.location.search);
-      let wallet = params.get("wallet");
-      if(!wallet) wallet = localStorage.getItem("walletAddress");
+      const wallet = params.get("wallet")?.toLowerCase();
       if(!wallet) {
-        alert("Utente non loggato!");
+        alert("Wallet del profilo non specificato!");
         window.location.href = "/";
       }
-      wallet = wallet?.toLowerCase();
-      currentWallet = wallet;
       return wallet;
+    }
 
+    // 🔹 Recupera wallet loggato tramite MetaMask
+    async function getLoggedWallet() {
+      if(typeof window.ethereum === 'undefined') return null;
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        return accounts[0].toLowerCase();
+      } catch(err) {
+        console.error("Errore connessione MetaMask:", err);
+        return null;
+      }
     }
 
     // --- Fetch dati utente ---
@@ -97,10 +109,10 @@
     }
 
     // --- Render dati utente ---
-    function renderUser(user) {
+    function renderUser(user, loggedWallet) {
       const container = document.getElementById("profileData");
       container.innerHTML = "";
-      const isOwner = currentWallet && (user.wallet_address.toLowerCase() === currentWallet);
+      const isOwner = loggedWallet && (user.wallet_address.toLowerCase() === loggedWallet);
 
       function createEditableField(label, field, value) {
         const p = document.createElement("p");
@@ -159,6 +171,7 @@
         }
 
         container.appendChild(p);
+        
       }
 
       createEditableField("Username", "username", user.username);
@@ -168,19 +181,39 @@
       walletP.innerHTML = `<strong>Wallet:</strong> ${user.wallet_address}`;
       container.appendChild(walletP);
 
+      // 🔹 Pulsante transazioni
+      const transactionsContainer = document.getElementById("transactionsContainer");
+      transactionsContainer.innerHTML = "";
+      if(isOwner) {
+        const transactionsBtn = document.createElement("button");
+        transactionsBtn.textContent = "Le mie transazioni";
+        transactionsBtn.style = `
+          background: linear-gradient(135deg, #f6851b, #ff9800);
+          border: none;
+          border-radius: 10px;
+          padding: 10px 20px;
+          color: #fff;
+          font-size: 16px;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          transition: transform 0.2s, box-shadow 0.3s;
+        `;
+        transactionsBtn.onclick = () => {
+          window.location.href = `/transazioniUtente.html?wallet=${loggedWallet}`;
+        };
+        transactionsContainer.appendChild(transactionsBtn);
+      }
+
       // --- Pulsante aggiungi libro ---
       const addBtn = document.getElementById("addBookBtn");
-      if(isOwner) {
-        addBtn.onclick = () => window.location.href = "/aggiungiLibro.html";
-        addBtn.style.display = "inline-block";
-      } else {
-        addBtn.style.display = "none";
-      }
+      addBtn.style.display = isOwner ? "inline-block" : "none";
+      if(isOwner) addBtn.onclick = () => window.location.href = "/aggiungiLibro.html";
 
       // --- Pulsante cancella profilo ---
       const deleteBtn = document.getElementById("deleteProfileBtn");
+      deleteBtn.style.display = isOwner ? "inline-block" : "none";
       if(isOwner) {
-        deleteBtn.style.display = "inline-block";
+        deleteBtn.textContent = "🗑️";
         deleteBtn.onclick = async () => {
           const confirmDelete = confirm("ATTENZIONE! Cancellando il profilo, verranno eliminati anche tutti i libri associati. Sei sicuro?");
           if(!confirmDelete) return;
@@ -189,14 +222,13 @@
             const res = await fetch("/api/deleteUser", {
               method: "DELETE",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ wallet: currentWallet })
+              body: JSON.stringify({ wallet: loggedWallet })
             });
 
             const data = await res.json();
             if(res.ok) {
               alert("Profilo e libri eliminati con successo!");
-              localStorage.removeItem("walletAddress");
-              window.location.href = "/index.html";
+              window.location.href = "/";
             } else {
               alert("Errore nella cancellazione: " + data.error);
             }
@@ -205,8 +237,6 @@
             alert("Errore nella cancellazione");
           }
         };
-      } else {
-        deleteBtn.style.display = "none";
       }
     }
 
@@ -237,14 +267,28 @@
 
     // --- Render pagina completa ---
     async function renderProfilePage() {
-      const wallet = getWallet();
-      const user = await getUserData(wallet);
+      const profileWallet = getProfileWallet();
+      if(!profileWallet) return;
+
+      const loggedWallet = await getLoggedWallet();
+      if(!loggedWallet) alert("MetaMask non connesso, alcune funzionalità saranno disabilitate");
+
+      const user = await getUserData(profileWallet);
       if(!user) return;
-      renderUser(user);
-      await renderBooks(wallet);
+
+      renderUser(user, loggedWallet);
+      await renderBooks(profileWallet);
+
+      // 🔹 Ricarica se l'utente cambia account MetaMask
+      if(window.ethereum) {
+        window.ethereum.on('accountsChanged', () => {
+          window.location.reload();
+        });
+      }
     }
 
     renderProfilePage();
+    
   </script>
 </body>
 </html>

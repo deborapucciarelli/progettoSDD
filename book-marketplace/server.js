@@ -348,6 +348,44 @@ app.delete('/api/buyBook', async (req, res) => {
   }
 });
 
+// Salva transazione
+app.post('/api/transactions', async (req, res) => {
+  try {
+    const tx = req.body;
+    if(!tx.tx_hash || !tx.buyer_wallet_address || !tx.seller_wallet_address) 
+      return res.status(400).json({ error: "Dati transazione incompleti" });
+
+    // lowercase dei wallet
+    tx.buyer_wallet_address = tx.buyer_wallet_address.toLowerCase();
+    tx.seller_wallet_address = tx.seller_wallet_address.toLowerCase();
+
+    await db.collection("transactions").insertOne(tx);
+    res.json({ success: true });
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: "Errore salvataggio transazione" });
+  }
+});
+
+// Recupera transazioni utente
+app.get('/api/transactions', async (req, res) => {
+  try {
+    let wallet = req.query.wallet;
+    if(!wallet) return res.status(400).json({ error: "Wallet mancante" });
+    wallet = wallet.toLowerCase();
+
+    const txs = await db.collection("transactions")
+      .find({ $or: [ { buyer_wallet_address: wallet }, { seller_wallet_address: wallet } ] })
+      .sort({ timestamp: -1 })
+      .toArray();
+
+    res.json(txs);
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: "Errore recupero transazioni" });
+  }
+});
+
 /* ------------------- STATIC FILES ------------------- */
 app.use(express.static(path.join(__dirname, 'public')));
 

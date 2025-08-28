@@ -18,11 +18,12 @@
 
 <div class="books-section" id="bookContainer"></div>
 
-<!-- Script principale come modulo -->
 <script type="module">
 import { contractAddress, contractABI } from '/js/contractData.js';
 
 let currentWallet = localStorage.getItem("walletAddress") || "";
+let currentBook = null;
+let currentBookSellerWallet = "";
 
 // 🔹 Connetti wallet
 async function connectWallet() {
@@ -38,7 +39,7 @@ async function connectWallet() {
 
 // 🔹 Acquisto libro
 async function buyBookOnChain(bookId, priceEth) {
-  const { signer } = await connectWallet();
+  const { signer, account } = await connectWallet();
   if (!signer) return;
 
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
@@ -47,21 +48,41 @@ async function buyBookOnChain(bookId, priceEth) {
     const tx = await contract.buyBook(bookId, { value: ethers.parseEther(priceEth) });
     await tx.wait();
 
-    // Aggiorno DB
-    const res = await fetch('/api/buyBook', {
+    // 🔹 Salva transazione su MongoDB
+    const resTx = await fetch('/api/transactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tx_hash: tx.hash,
+        buyer_wallet_address: account,
+        seller_wallet_address: currentBookSellerWallet,
+        username: localStorage.getItem('username') || 'N-A',
+        wallet_address: account,
+        ISBN: currentBook.ISBN,
+        "Book-Title": currentBook['Book-Title'],
+        DataCreazione: currentBook.DataCreazione,
+        amount: priceEth,
+        currency: "ETH",
+        status: "completed",
+        timestamp: new Date().toISOString()
+      })
+    });
+
+    if (!resTx.ok) {
+      const err = await resTx.json();
+      alert("Acquisto completato su blockchain ma errore salvataggio: " + err.error);
+      return;
+    }
+
+    // 🔹 Rimuovi libro dal DB locale
+    await fetch('/api/buyBook', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ _id: bookId })
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      alert("Acquisto registrato su blockchain ma errore DB: " + err.error);
-      return;
-    }
-
     alert("Acquisto completato!");
-    window.location.href = "/home.html";
+    window.location.href = "/transazioniUtente.html"; // 🔹 Reindirizza alla pagina transazioni
 
   } catch(err) {
     console.error(err);
@@ -78,6 +99,8 @@ async function loadBook() {
     return;
   }
   const book = await res.json();
+  currentBook = book;
+  currentBookSellerWallet = book.User?.wallet_address || "";
 
   const bookWallet = book.User?.wallet_address || "";
   const isOwner = currentWallet && bookWallet && currentWallet === bookWallet;
