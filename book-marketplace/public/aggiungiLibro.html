@@ -36,7 +36,7 @@
         return;
     }
 
-    const wallet = localStorage.getItem("walletAddress");
+    const wallet = localStorage.getItem("walletAddress")?.toLowerCase();
     if (!wallet) {
         alert("Devi prima connettere il wallet da index.html!");
         window.location.href = "/index.html";
@@ -45,7 +45,8 @@
 
     const provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
-    account = await signer.getAddress();
+    account = (await signer.getAddress()).toLowerCase();
+
 
     contract = new ethers.Contract(contractAddress, contractABI, signer);
   }

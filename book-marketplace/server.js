@@ -94,8 +94,10 @@ app.get('/api/getUsername', async (req, res) => {
 // Recupera dati utente completi
 app.get('/api/getUserData', async (req, res) => {
   try {
-    const { wallet } = req.query;
+    let { wallet } = req.query;
     if (!wallet) return res.status(400).json({ error: 'Wallet mancante' });
+
+    wallet = wallet.toLowerCase(); // ✅ normalizza sempre
 
     const user = await db.collection("users").findOne({ wallet_address: wallet });
     if (!user) return res.status(404).json({ error: 'Utente non trovato' });
@@ -173,11 +175,12 @@ app.get('/api/getBooksByWallet', async (req, res) => {
 
 app.post('/api/loginOrRegister', async (req, res) => {
   try {
-    const { wallet } = req.body;
-    //console.log("Wallet ricevuto dal frontend:", wallet);
+    let { wallet } = req.body;
+    if (!wallet) return res.status(400).json({ error: "Wallet mancante" });
+
+    wallet = wallet.toLowerCase(); // ✅ salvi tutto lowercase
 
     let user = await db.collection("users").findOne({ wallet_address: wallet });
-    //console.log("Utente trovato:", user);
 
     if (!user) {
       const newUser = {
@@ -196,6 +199,7 @@ app.post('/api/loginOrRegister', async (req, res) => {
     res.status(500).json({ error: "Errore login/registrazione" });
   }
 });
+
 
 // Update utente
 app.put('/api/updateUser', async (req, res) => {
@@ -256,6 +260,12 @@ app.post('/api/addBook', async (req, res) => {
       return res.status(400).json({ error: "Dati libro incompleti" });
     }
 
+    // normalizza wallet in lowercase
+    book.User.wallet_address = book.User.wallet_address.toLowerCase();
+
+    // rigenera _id con wallet normalizzato se serve
+    book._id = `${book.ISBN}_${book.User.username}_${book.DataCreazione}`;
+
     // Controlla se libro esiste già
     const existing = await db.collection("book").findOne({ _id: book._id });
     if(existing) return res.status(409).json({ error: "Libro già presente" });
@@ -267,6 +277,7 @@ app.post('/api/addBook', async (req, res) => {
     res.status(500).json({ error: "Errore aggiunta libro" });
   }
 });
+
 
 // Cancella utente + libri
 app.delete('/api/deleteUser', async (req, res) => {
