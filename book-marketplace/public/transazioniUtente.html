@@ -10,8 +10,10 @@
 
 <div id="navbar"></div>
 <script src="/js/loadNavbar.js"></script>
+<script src="/js/abbreviateWallet.js"></script>
 
-<h1>Le Mie Transazioni</h1>
+
+<h1>Riepilogo Transazioni</h1>
 <div class="tx-container" id="txContainer"></div>
 
 <script type="module">
@@ -34,13 +36,15 @@ async function loadTransactions() {
     const div = document.createElement("div");
     div.className = `tx-item ${role}`;
     div.innerHTML = `
-      <p><strong>Libro:</strong> ${tx["Book-Title"]} (ISBN: ${tx.ISBN})</p>
-      <p><strong>Ruolo:</strong> ${role}</p>
-      <p><strong>Wallet Opposto:</strong> ${role === "buyer" ? tx.seller_wallet_address : tx.buyer_wallet_address}</p>
-      <p><strong>Prezzo:</strong> ${tx.amount} ${tx.currency}</p>
-      <p><strong>Data:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
-      <p><strong>TxHash:</strong> ${tx.tx_hash}</p>
-    `;
+  <p><strong>Libro:</strong> ${tx["Book-Title"]} (ISBN: ${tx.ISBN})</p>
+  <p><strong>Ruolo:</strong> ${role}</p>
+  <p><strong>Wallet Opposto:</strong> ${abbreviateAddress(role === "buyer" ? tx.seller_wallet_address : tx.buyer_wallet_address)}</p>
+  <p><strong>Prezzo:</strong> ${tx.amount} ${tx.currency}</p>
+  <p><strong>Data:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
+  <p><strong>TxHash:</strong> ${abbreviateAddress(tx.tx_hash)}</p>
+
+`;
+
     container.appendChild(div);
   });
 }
