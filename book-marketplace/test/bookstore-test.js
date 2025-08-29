@@ -1,7 +1,4 @@
 import assert from "node:assert/strict";
-import { describe, it, beforeEach } from "node:test";
-import pkg from "hardhat";
-const { ethers } = pkg;
 
 describe("BookStore contract on Ganache", function () {
   let BookStore;
@@ -13,10 +10,8 @@ describe("BookStore contract on Ganache", function () {
   let priceWei;
 
   beforeEach(async () => {
-    // Ottieni gli account di Hardhat
     [owner, buyer] = await ethers.getSigners();
 
-    // Deploy del contratto
     BookStore = await ethers.getContractFactory("BookStore", owner);
     contract = await BookStore.deploy();
     await contract.waitForDeployment();
@@ -25,7 +20,6 @@ describe("BookStore contract on Ganache", function () {
   });
 
   it("Should add a book correctly", async () => {
-    // Owner aggiunge il libro
     await contract.addBook(bookId, "978-3-16-148410-0", priceWei);
 
     const book = await contract.books(bookId);
@@ -36,10 +30,8 @@ describe("BookStore contract on Ganache", function () {
   });
 
   it("Should allow buying a book from a different account", async () => {
-    // Owner aggiunge il libro
     await contract.addBook(bookId, "978-3-16-148410-0", priceWei);
 
-    // Buyer compra il libro
     const contractBuyer = contract.connect(buyer);
     const tx = await contractBuyer.buyBook(bookId, { value: priceWei });
     await tx.wait();
@@ -48,4 +40,50 @@ describe("BookStore contract on Ganache", function () {
     assert.equal(book.owner, await buyer.getAddress());
     assert.equal(book.sold, true);
   });
+
+  it("Should revert if buyer sends insufficient Ether", async () => {
+  await contract.addBook(bookId, "978-3-16-148410-0", priceWei);
+
+  const contractBuyer = contract.connect(buyer);
+
+  await assert.rejects(
+    contractBuyer.buyBook(bookId, { value: ethers.parseEther("0.001") }),
+    /Ether insufficiente/   // ora corrisponde al tuo require
+  );
+});
+
+it("Should revert if the book is already sold", async () => {
+  await contract.addBook(bookId, "978-3-16-148410-0", priceWei);
+
+  const contractBuyer = contract.connect(buyer);
+  await contractBuyer.buyBook(bookId, { value: priceWei });
+
+  await assert.rejects(
+    contractBuyer.buyBook(bookId, { value: priceWei }),
+    /Libro gia' venduto/  // ora corrisponde al tuo require
+  );
+});
+
+it("Should transfer Ether to the seller after purchase", async () => {
+  await contract.addBook(bookId, "978-3-16-148410-0", priceWei);
+
+  // Bilancio del venditore prima della vendita (BigInt)
+  const sellerBalanceBefore = await ethers.provider.getBalance(await owner.getAddress());
+
+  const contractBuyer = contract.connect(buyer);
+  const tx = await contractBuyer.buyBook(bookId, { value: priceWei });
+  await tx.wait();
+
+  // Bilancio del venditore dopo la vendita (BigInt)
+  const sellerBalanceAfter = await ethers.provider.getBalance(await owner.getAddress());
+
+  // Confronto convertendo priceWei in BigInt
+  assert(
+    sellerBalanceAfter === sellerBalanceBefore + priceWei,
+    "Il bilancio del venditore deve aumentare esattamente del prezzo del libro"
+  );
+});
+
+
+
 });
